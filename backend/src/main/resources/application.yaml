@@ -1,0 +1,73 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /personal-finance-tracker
+    encoding:
+      force: true
+  shutdown: graceful
+spring:
+  application:
+    name: personal-finance-tracker
+  profiles:
+    active: dev
+  datasource:
+    url: ${personal-finance-tracker.datasource.url}
+    password: ${personal-finance-tracker.datasource.password}
+    username: ${personal-finance-tracker.datasource.username}
+    hikari:
+      maximum-pool-size: ${personal-finance-tracker.datasource.hikari.maximum-pool-size}
+  web:
+    resources:
+      add-mappings: false
+  jpa:
+    open-in-view: ${personal-finance-tracker.jpa.open-in-view}
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: ${personal-finance-tracker.jpa.properties.hibernate.enable_lazy_load_no_trans}
+    hibernate:
+      ddl-auto: ${personal-finance-tracker.jpa.hibernate.ddl-auto}
+    show-sql: ${personal-finance-tracker.jpa.show-sql}
+  h2:
+    console:
+      enabled: ${personal-finance-tracker.h2.console.enabled}
+      path: ${personal-finance-tracker.h2.console.path}
+      settings:
+        web-allow-others: ${personal-finance-tracker.h2.console.settings.web-allow-others}
+  flyway:
+    enabled: ${personal-finance-tracker.flyway.enabled}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    clean-disabled: ${personal-finance-tracker.flyway.clean-disabled:true}
+    validate-on-migrate: ${personal-finance-tracker.flyway.validate-on-migrate:true}
+    installed-by: ${spring.application.name}
+    placeholder-replacement: true
+    fail-on-missing-locations: true
+    encoding: UTF-8
+  main:
+    allow-bean-definition-overriding: true
+  jackson:
+    default-property-inclusion: non_null
+
+springdoc:
+  swagger-ui:
+    enabled: ${personal-finance-tracker.springdoc.swagger-ui.enabled}
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+
+openapi-servers-urls: ${personal-finance-tracker.openapi-servers-urls}
+
+app:
+  jwt:
+    access-token:
+      secret: ${personal-finance-tracker.jwt.access-token.secret}
+      expiration-minutes: ${personal-finance-tracker.jwt.access-token.expiration-minutes}
+    refresh-token:
+      secret: ${personal-finance-tracker.jwt.refresh-token.secret}
+      expiration-days: ${personal-finance-tracker.jwt.refresh-token.expiration-days}
+
+logging:
+  pattern:
+    console: "%red(%d{yyyy-MM-dd'T'HH:mm:ssXXX}) %magenta([%thread]) [${spring.application.name}, %X{traceId:-}, %X{spanId:-}] %highlight(%-5level) %logger{36}.%M - %msg%n"
+  level:
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
