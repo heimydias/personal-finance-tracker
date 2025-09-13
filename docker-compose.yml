@@ -1,0 +1,60 @@
+services:
+
+  personal-finance-tracker.mysql:
+    container_name: personal-finance-tracker.mysql
+    hostname: personal-finance-tracker.mysql
+    image: mysql:8.1
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+    ports:
+      - "${DATABASE_PORT}:3306"
+    networks:
+      - personal-finance-tracker-network
+    volumes:
+      - personal-finance-tracker-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DATABASE_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+  
+  personal-finance-tracker.backend:
+    container_name: personal-finance-tracker.app
+    hostname: personal-finance-tracker.app
+    env_file:
+      - .env
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - personal-finance-tracker-network
+    depends_on:
+      personal-finance-tracker.mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/personal-finance-tracker/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+networks:
+  personal-finance-tracker-network:
+    name: personal-finance-tracker-network
+    driver: bridge
+
+volumes:
+  personal-finance-tracker-mysql-data:
+    driver: local
