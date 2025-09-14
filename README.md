@@ -2,17 +2,17 @@
 
 Sistema de gerenciamento financeiro pessoal com autenticação JWT, controle de despesas e receitas, categorias personalizadas e relatórios financeiros.
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=souluanf_ecommerce-management-api)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=souluanf_ecommerce-management-api&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=souluanf_golden-raspberry-awards-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=coverage)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=bugs)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=souluanf_golden-raspberry-awards-api)
 
 ## Sumário
 
