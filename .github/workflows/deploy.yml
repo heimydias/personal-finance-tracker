@@ -1,47 +1,47 @@
-name: Deploy to Staging
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  backend:
-    name: Deploy backend to Heroku
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
-      
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      
-      - name: Build application
-        run: mvn -B clean package -DskipTests
-      
-      - name: Install Heroku CLI
-        run: curl https://cli-assets.heroku.com/install.sh | sh
-      
-      - name: Deploy to Heroku Staging
-        uses: akhileshns/heroku-deploy@v3.14.15
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ env.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-      
-      - name: Post deployment notification
-        if: success()
-        run: |
-          echo "🚀 Deployment successful!"
-          echo "🔗 App URL: https://${{ env.HEROKU_APP_NAME }}.herokuapp.com"
+#name: Deploy
+#
+#on:
+#  push:
+#    branches: [main]
+#
+#jobs:
+#  backend:
+#    name: Deploy backend to Heroku
+#    runs-on: ubuntu-latest
+#    environment: staging
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Set up JDK 21
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: 'zulu'
+#          java-version: '21'
+#
+#      - name: Cache Maven packages
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-m2
+#
+#      - name: Build application
+#        run: mvn -B clean package -DskipTests
+#
+#      - name: Install Heroku CLI
+#        run: curl https://cli-assets.heroku.com/install.sh | sh
+#
+#      - name: Deploy to Heroku Staging
+#        uses: akhileshns/heroku-deploy@v3.14.15
+#        with:
+#          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+#          heroku_app_name: ${{ env.HEROKU_APP_NAME }}
+#          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+#
+#      - name: Post deployment notification
+#        if: success()
+#        run: |
+#          echo "🚀 Deployment successful!"
+#          echo "🔗 App URL: https://${{ env.HEROKU_APP_NAME }}.herokuapp.com"
