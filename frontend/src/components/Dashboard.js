@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { authService } from '../services/auth';
 
 const Dashboard = ({ onLogout }) => {
   const userInfo = authService.getUserInfo();
+
+  useEffect(() => {
+    document.title = 'PFT - Dashboard';
+  }, []);
 
   const handleLogout = () => {
     authService.logout();

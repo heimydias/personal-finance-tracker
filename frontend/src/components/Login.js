@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { authService } from '../services/auth';
 
 const Login = ({ onLoginSuccess, onGoToRegister }) => {
@@ -6,6 +6,10 @@ const Login = ({ onLoginSuccess, onGoToRegister }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    document.title = 'PFT - Login';
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

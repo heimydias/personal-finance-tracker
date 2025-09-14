@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { authService } from '../services/auth';
 
 const Register = ({ onRegisterSuccess, onBackToLogin }) => {
@@ -9,6 +9,10 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    document.title = 'PFT - Cadastro';
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
