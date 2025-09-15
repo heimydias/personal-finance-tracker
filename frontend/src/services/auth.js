@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/personal-finance-tracker/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/personal-finance-tracker/api/v1';
 
 const authAPI = axios.create({
   baseURL: API_BASE_URL,
@@ -74,7 +74,19 @@ export const authService = {
 
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Erro no login' };
+      const errorData = error.response?.data;
+      if (errorData) {
+        let message = errorData.detail || errorData.message || 'Erro no login';
+
+        if (message === 'Invalid email or password') {
+          message = 'Email ou senha inválidos';
+        } else if (message.includes('email') && message.includes('already')) {
+          message = 'Este email já está em uso';
+        }
+
+        throw { message };
+      }
+      throw { message: 'Erro no login' };
     }
   },
 
@@ -87,7 +99,12 @@ export const authService = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Erro no registro' };
+      const errorData = error.response?.data;
+      if (errorData) {
+        const message = errorData.detail || errorData.message || 'Erro no registro';
+        throw { message };
+      }
+      throw { message: 'Erro no registro' };
     }
   },
 
