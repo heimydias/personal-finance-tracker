@@ -51,7 +51,6 @@ public class ValidPasswordValidator implements ConstraintValidator<ValidPassword
             violations.add("deve conter pelo menos um caractere especial");
         }
 
-        // Check for common patterns
         if (isCommonPassword(password)) {
             violations.add("não pode ser uma senha comum");
         }

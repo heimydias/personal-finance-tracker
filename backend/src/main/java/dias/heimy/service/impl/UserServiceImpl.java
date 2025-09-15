@@ -148,7 +148,6 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException(email);
         }
 
-        // Se tentar criar ADMIN, deve estar logado como ADMIN
         if (role == UserRole.ADMIN) {
             if (authorizationHeader == null || authorizationHeader.trim().isEmpty()) {
                 log.warn("Tentativa de criar usuário ADMIN sem token de autorização");
