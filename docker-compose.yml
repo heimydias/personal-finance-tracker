@@ -28,11 +28,11 @@ services:
   personal-finance-tracker.backend:
     container_name: personal-finance-tracker.app
     hostname: personal-finance-tracker.app
-    env_file:
-      - .env
     build:
       context: backend
       dockerfile: Dockerfile
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     networks:
@@ -48,6 +48,29 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    restart: unless-stopped
+
+  personal-finance-tracker.frontend:
+    container_name: personal-finance-tracker.frontend
+    hostname: personal-finance-tracker.frontend
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:80"
+    networks:
+      - personal-finance-tracker-network
+    depends_on:
+      personal-finance-tracker.backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
 
 networks:
