@@ -1,6 +1,13 @@
 package dias.heimy.config.security;
 
-import static dias.heimy.constants.PathConstants.AUTH_WILDCARD;
+import static dias.heimy.constants.PathConstants.AUTH_REFRESH_TOKEN;
+import static dias.heimy.constants.PathConstants.AUTH_TOKEN;
+import static dias.heimy.constants.PathConstants.USERS;
+import static dias.heimy.constants.PathConstants.USERS_BY_ID;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 
 import dias.heimy.repository.UserRepository;
 import dias.heimy.service.CustomUserDetailsService;
@@ -42,7 +49,8 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth.requestMatchers(
-                                AUTH_WILDCARD,
+                                AUTH_TOKEN,
+                                AUTH_REFRESH_TOKEN,
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
@@ -53,6 +61,16 @@ public class SecurityConfig {
                                 "/swagger",
                                 "/swagger-ui")
                         .permitAll()
+                        .requestMatchers(POST, USERS)
+                        .permitAll()
+                        .requestMatchers(GET, USERS)
+                        .hasRole("ADMIN")
+                        .requestMatchers(GET, USERS_BY_ID)
+                        .authenticated()
+                        .requestMatchers(PUT, USERS_BY_ID)
+                        .authenticated()
+                        .requestMatchers(DELETE, USERS_BY_ID)
+                        .authenticated()
                         .anyRequest()
                         .authenticated())
                 .build();

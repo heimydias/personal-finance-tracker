@@ -23,10 +23,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Slf4j
-@Component
+@Service
 public class JwtTokenProvider {
 
     private final SecretKey accessTokenKey;
@@ -70,7 +70,11 @@ public class JwtTokenProvider {
     }
 
     public RefreshToken generateRefreshToken(String email) {
-        Instant expiresAt = Instant.now().plus(refreshTokenExpirationDays, ChronoUnit.DAYS);
+        return generateRefreshToken(email, refreshTokenExpirationDays);
+    }
+
+    public RefreshToken generateRefreshToken(String email, long customExpirationDays) {
+        Instant expiresAt = Instant.now().plus(customExpirationDays, ChronoUnit.DAYS);
 
         String token = Jwts.builder()
                 .subject(email)
@@ -80,7 +84,7 @@ public class JwtTokenProvider {
                 .signWith(refreshTokenKey)
                 .compact();
 
-        log.debug("Token de renovação gerado para usuário: {}", email);
+        log.debug("Token de renovação gerado para usuário: {} com expiração de {} dias", email, customExpirationDays);
         return new RefreshToken(token, expiresAt);
     }
 
