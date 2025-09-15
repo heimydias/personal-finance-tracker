@@ -1,11 +1,11 @@
 package dias.heimy.dto.request;
 
 import dias.heimy.domain.enums.UserRole;
+import dias.heimy.domain.validation.ValidPassword;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 @Schema(description = "Request para registro de novo usuário")
 public record UserRegisterRequest(
@@ -13,9 +13,14 @@ public record UserRegisterRequest(
                 @NotBlank(message = "Email é obrigatório")
                 @Email(message = "Email deve ter formato válido")
                 String email,
-        @Schema(description = "Senha do usuário", example = "password123")
+        @Schema(description = "Senha do usuário", example = "Password123!")
                 @NotBlank(message = "Senha é obrigatória")
-                @Size(min = 6, max = 100, message = "Senha deve ter entre 6 e 100 caracteres")
+                @ValidPassword(
+                        minLength = 8,
+                        requireUppercase = true,
+                        requireLowercase = true,
+                        requireDigit = true,
+                        requireSpecialChar = true)
                 String password,
         @Schema(
                         description = "Perfil do usuário",
