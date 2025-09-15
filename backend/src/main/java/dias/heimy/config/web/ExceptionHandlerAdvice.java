@@ -1,8 +1,9 @@
 package dias.heimy.config.web;
 
 import static dias.heimy.constants.ExceptionHandlerAdviceConstants.ERROR_CODE_PROPERTY;
-import static dias.heimy.constants.ExceptionHandlerAdviceConstants.STACKTRACE_PROPERTY;
 import static dias.heimy.constants.ExceptionHandlerAdviceConstants.TIMESTAMP_PROPERTY;
+import static dias.heimy.domain.enums.ExceptionType.AUTHENTICATION;
+import static dias.heimy.domain.enums.ExceptionType.CONFLICT;
 import static java.lang.String.format;
 import static java.time.LocalTime.now;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -12,12 +13,16 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 import static org.springframework.http.ProblemDetail.forStatusAndDetail;
 import static org.springframework.http.ResponseEntity.status;
 
+import dias.heimy.domain.enums.ErrorCode;
 import dias.heimy.domain.exception.BusinessException;
+import dias.heimy.domain.exception.DomainException;
 import dias.heimy.domain.exception.InvalidTokenException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.List;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -42,17 +47,41 @@ public class ExceptionHandlerAdvice {
         ProblemDetail problemDetail = forStatusAndDetail(status, exception.getMessage());
         problemDetail.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         problemDetail.setProperty(ERROR_CODE_PROPERTY, exception.getErrorCode());
+        problemDetail.setProperty("exceptionType", exception.getType().name());
+
+        if ((exception.getType() == AUTHENTICATION || exception.getType() == CONFLICT)
+                && exception instanceof DomainException domainEx) {
+            problemDetail.setProperty("errorCode", domainEx.getErrorCode());
+        }
+
         return status(status).body(problemDetail);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        ProblemDetail problemDetail = forStatusAndDetail(BAD_REQUEST, "Validation failed for argument");
-        List<String> errors = exception.getBindingResult().getFieldErrors().stream()
+        List<String> fieldErrors = exception.getBindingResult().getFieldErrors().stream()
                 .map(error -> format("%s: %s", error.getField(), error.getDefaultMessage()))
                 .toList();
+
+        List<String> objectErrors = exception.getBindingResult().getGlobalErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList();
+
+        String mainMessage;
+        if (!objectErrors.isEmpty()) {
+            mainMessage = objectErrors.getFirst();
+        } else if (!fieldErrors.isEmpty()) {
+            mainMessage = "Validation failed for fields";
+        } else {
+            mainMessage = "Validation failed for argument";
+        }
+
+        ProblemDetail problemDetail = forStatusAndDetail(BAD_REQUEST, mainMessage);
         problemDetail.setProperty(TIMESTAMP_PROPERTY, Instant.now());
-        problemDetail.setProperty(STACKTRACE_PROPERTY, errors);
+        problemDetail.setProperty("fieldErrors", fieldErrors);
+        problemDetail.setProperty("violations", objectErrors);
+        problemDetail.setProperty(ERROR_CODE_PROPERTY, ErrorCode.VALIDATION_ERROR.getCode());
+
         return problemDetail;
     }
 
@@ -81,7 +110,17 @@ public class ExceptionHandlerAdvice {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ProblemDetail> handleConstraintViolationException(ConstraintViolationException exception) {
-        ProblemDetail problemDetail = exceptionToProblemDetailForStatusAndDetail(BAD_REQUEST, exception.getMessage());
+        List<String> violations = exception.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .toList();
+
+        String mainMessage = violations.isEmpty() ? "Validation failed" : violations.getFirst();
+
+        ProblemDetail problemDetail = forStatusAndDetail(BAD_REQUEST, mainMessage);
+        problemDetail.setProperty(TIMESTAMP_PROPERTY, Instant.now());
+        problemDetail.setProperty("violations", violations);
+        problemDetail.setProperty(ERROR_CODE_PROPERTY, ErrorCode.VALIDATION_ERROR.getCode());
+
         return status(BAD_REQUEST).body(problemDetail);
     }
 
@@ -100,16 +139,16 @@ public class ExceptionHandlerAdvice {
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleUsernameNotFoundException(UsernameNotFoundException exception) {
         ProblemDetail problemDetail =
-                exceptionToProblemDetailForStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email or password");
-        problemDetail.setProperty(ERROR_CODE_PROPERTY, "INVALID_CREDENTIALS");
+                exceptionToProblemDetailForStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problemDetail.setProperty(ERROR_CODE_PROPERTY, ErrorCode.INVALID_CREDENTIALS.getCode());
         return status(HttpStatus.UNAUTHORIZED).body(problemDetail);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ProblemDetail> handleBadCredentialsException(BadCredentialsException exception) {
         ProblemDetail problemDetail =
-                exceptionToProblemDetailForStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email or password");
-        problemDetail.setProperty(ERROR_CODE_PROPERTY, "INVALID_CREDENTIALS");
+                exceptionToProblemDetailForStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problemDetail.setProperty(ERROR_CODE_PROPERTY, ErrorCode.INVALID_CREDENTIALS.getCode());
         return status(HttpStatus.UNAUTHORIZED).body(problemDetail);
     }
 

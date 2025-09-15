@@ -1,5 +1,7 @@
 package dias.heimy.domain.exception;
 
+import dias.heimy.domain.enums.ErrorCode;
+import dias.heimy.domain.enums.ExceptionType;
 import java.io.Serial;
 
 public class UserNotFoundException extends BusinessException {
@@ -11,13 +13,20 @@ public class UserNotFoundException extends BusinessException {
         super("User not found with email: " + email);
     }
 
+    private static final ErrorCode ERROR_CODE = ErrorCode.USER_NOT_FOUND;
+
     @Override
     public String getErrorCode() {
-        return "USER_NOT_FOUND";
+        return ERROR_CODE.getCode();
     }
 
     @Override
     public int getHttpStatusCode() {
-        return 404;
+        return ERROR_CODE.getHttpStatusCode();
+    }
+
+    @Override
+    public ExceptionType getType() {
+        return ExceptionType.NOT_FOUND;
     }
 }

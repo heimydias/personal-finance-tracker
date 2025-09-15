@@ -1,10 +1,12 @@
 package dias.heimy.domain.exception;
 
+import dias.heimy.domain.enums.ErrorCode;
+import dias.heimy.domain.enums.ExceptionType;
 import java.io.Serial;
 
 public class UserAlreadyExistsException extends BusinessException {
 
-    private static final String ERROR_CODE = "USER_ALREADY_EXISTS";
+    private static final ErrorCode ERROR_CODE = ErrorCode.USER_ALREADY_EXISTS;
 
     @Serial
     private static final long serialVersionUID = -4227606701914326086L;
@@ -15,11 +17,16 @@ public class UserAlreadyExistsException extends BusinessException {
 
     @Override
     public String getErrorCode() {
-        return ERROR_CODE;
+        return ERROR_CODE.getCode();
     }
 
     @Override
     public int getHttpStatusCode() {
-        return 409;
+        return ERROR_CODE.getHttpStatusCode();
+    }
+
+    @Override
+    public ExceptionType getType() {
+        return ExceptionType.CONFLICT;
     }
 }

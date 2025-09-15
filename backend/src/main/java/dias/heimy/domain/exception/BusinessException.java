@@ -1,5 +1,6 @@
 package dias.heimy.domain.exception;
 
+import dias.heimy.domain.enums.ExceptionType;
 import java.io.Serial;
 
 public abstract class BusinessException extends RuntimeException {
@@ -20,4 +21,6 @@ public abstract class BusinessException extends RuntimeException {
     public int getHttpStatusCode() {
         return 400;
     }
+
+    public abstract ExceptionType getType();
 }

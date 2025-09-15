@@ -1,5 +1,7 @@
 package dias.heimy.domain.exception;
 
+import dias.heimy.domain.enums.ErrorCode;
+import dias.heimy.domain.enums.ExceptionType;
 import java.io.Serial;
 
 public class InvalidTokenException extends BusinessException {
@@ -15,13 +17,20 @@ public class InvalidTokenException extends BusinessException {
         super(message, cause);
     }
 
+    private static final ErrorCode ERROR_CODE = ErrorCode.INVALID_TOKEN;
+
     @Override
     public String getErrorCode() {
-        return "INVALID_TOKEN";
+        return ERROR_CODE.getCode();
     }
 
     @Override
     public int getHttpStatusCode() {
-        return 401;
+        return ERROR_CODE.getHttpStatusCode();
+    }
+
+    @Override
+    public ExceptionType getType() {
+        return ExceptionType.AUTHENTICATION;
     }
 }
