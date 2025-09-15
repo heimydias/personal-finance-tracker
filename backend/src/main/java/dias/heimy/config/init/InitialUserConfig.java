@@ -27,6 +27,7 @@ public class InitialUserConfig implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         createAdminUserIfNotExists();
+        createUsersIfNotExists();
     }
 
     private void createAdminUserIfNotExists() {
@@ -44,5 +45,21 @@ public class InitialUserConfig implements CommandLineRunner {
         } else {
             log.info("Usuário administrador já existe: {}", adminEmail);
         }
+    }
+
+    private void createUsersIfNotExists() {
+        log.info("Criando usuários comuns");
+        for (int i = 1; i < 30; i++) {
+            User user = new User();
+            String email = "user" + i + "@user.com";
+            if (!userRepository.existsByEmail(email)) {
+                user.setEmail(email);
+                user.setEmail(email);
+                user.setPassword(passwordEncoder.encode("user123"));
+                user.setRole(UserRole.USER);
+                userRepository.save(user);
+            }
+        }
+        log.info("Usuários comuns criados com sucesso");
     }
 }
