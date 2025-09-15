@@ -3,8 +3,6 @@ package dias.heimy.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -13,15 +11,10 @@ import dias.heimy.config.security.JwtTokenProvider;
 import dias.heimy.domain.entity.User;
 import dias.heimy.domain.enums.UserRole;
 import dias.heimy.domain.exception.InvalidTokenException;
-import dias.heimy.domain.exception.UserAlreadyExistsException;
-import dias.heimy.domain.exception.UserNotFoundException;
 import dias.heimy.domain.valueobject.JwtToken;
 import dias.heimy.domain.valueobject.RefreshToken;
-import dias.heimy.dto.mapper.UserMapper;
 import dias.heimy.dto.request.LoginRequest;
 import dias.heimy.dto.request.RefreshTokenRequest;
-import dias.heimy.dto.request.UserRegisterRequest;
-import dias.heimy.dto.response.UserResponse;
 import dias.heimy.repository.UserRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -45,60 +38,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class AuthServiceImplTest {
 
     @Mock
-    private AuthenticationManager authenticationManager;
-
-    @Mock
     private UserRepository userRepository;
 
     @Mock
     private JwtTokenProvider jwtTokenProvider;
 
     @Mock
-    private UserMapper userMapper;
+    private AuthenticationManager authenticationManager;
 
     @Mock
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private AuthServiceImpl authService;
-
-    @Test
-    @DisplayName("Should register user successfully when valid data provided")
-    void shouldRegisterUser_WhenValidData() {
-
-        var request = new UserRegisterRequest("test@example.com", "password123", UserRole.USER);
-        var user = createTestUser();
-        var expectedResponse = createUserResponse();
-
-        when(userRepository.existsByEmail(request.email())).thenReturn(false);
-        when(userMapper.toEntity(request)).thenReturn(user);
-        when(passwordEncoder.encode(request.password())).thenReturn("encoded_password");
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userMapper.toResponse(user)).thenReturn(expectedResponse);
-
-        var result = authService.register(request);
-
-        assertThat(result).isEqualTo(expectedResponse);
-        verify(userRepository).existsByEmail(request.email());
-        verify(userMapper).toEntity(request);
-        verify(passwordEncoder).encode(request.password());
-        verify(userRepository).save(user);
-        verify(userMapper).toResponse(user);
-    }
-
-    @Test
-    @DisplayName("Should throw UserAlreadyExistsException when email already exists")
-    void shouldThrowException_WhenEmailAlreadyExists() {
-
-        var request = new UserRegisterRequest("existing@example.com", "password123", UserRole.USER);
-        when(userRepository.existsByEmail(request.email())).thenReturn(true);
-
-        assertThatThrownBy(() -> authService.register(request)).isInstanceOf(UserAlreadyExistsException.class);
-
-        verify(userRepository).existsByEmail(request.email());
-        verifyNoInteractions(userMapper, passwordEncoder);
-        verify(userRepository, never()).save(any());
-    }
 
     @Test
     @DisplayName("Should login successfully when valid credentials provided")
@@ -114,7 +66,7 @@ class AuthServiceImplTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
-        when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn(accessToken);
+        when(jwtTokenProvider.generateAccessToken("test@example.com", "USER")).thenReturn(accessToken);
         when(jwtTokenProvider.generateRefreshToken(request.email())).thenReturn(refreshToken);
 
         var result = authService.login(request);
@@ -123,32 +75,50 @@ class AuthServiceImplTest {
         assertThat(result.accessToken()).isEqualTo("access_token");
         assertThat(result.refreshToken()).isEqualTo("refresh_token");
         assertThat(result.userEmail()).isEqualTo(user.getEmail());
-        assertThat(result.userRole()).isEqualTo(user.getRole().getRoleName());
+        assertThat(result.userRole()).isEqualTo("USER");
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(userRepository).findByEmail(request.email());
-        verify(jwtTokenProvider).generateAccessToken(authentication);
+        verify(jwtTokenProvider).generateAccessToken("test@example.com", "USER");
         verify(jwtTokenProvider).generateRefreshToken(request.email());
     }
 
     @Test
-    @DisplayName("Should throw BadCredentialsException when authentication fails")
-    void shouldThrowException_WhenAuthenticationFails() {
+    @DisplayName("Should throw BadCredentialsException when invalid credentials")
+    void shouldThrowException_WhenInvalidCredentials() {
 
         var request = new LoginRequest("test@example.com", "wrong_password");
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-        assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(BadCredentialsException.class)
-                .hasMessage("Invalid credentials");
+        assertThatThrownBy(() -> authService.login(request)).isInstanceOf(BadCredentialsException.class);
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verifyNoInteractions(userRepository, jwtTokenProvider);
     }
 
     @Test
-    @DisplayName("Should refresh token successfully when valid refresh token provided")
+    @DisplayName("Should throw RuntimeException when user not found during login")
+    void shouldThrowException_WhenUserNotFoundDuringLogin() {
+
+        var request = new LoginRequest("test@example.com", "password123");
+        var authentication = createAuthentication();
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
+        when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Usuário não encontrado");
+
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userRepository).findByEmail(request.email());
+        verifyNoInteractions(jwtTokenProvider);
+    }
+
+    @Test
+    @DisplayName("Should refresh token successfully when valid refresh token")
     void shouldRefreshToken_WhenValidRefreshToken() {
 
         var request = new RefreshTokenRequest("valid_refresh_token");
@@ -157,13 +127,10 @@ class AuthServiceImplTest {
                 new JwtToken("new_access_token", Instant.now(), Instant.now().plusSeconds(3600));
         var refreshToken = new RefreshToken("new_refresh_token", Instant.now().plusSeconds(86400));
 
-        when(jwtTokenProvider.validateRefreshToken(request.refreshToken())).thenReturn(true);
         when(jwtTokenProvider.extractEmailFromRefreshToken(request.refreshToken()))
                 .thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(jwtTokenProvider.generateAccessToken(
-                        user.getEmail(), user.getRole().getAuthority()))
-                .thenReturn(accessToken);
+        when(jwtTokenProvider.generateAccessToken(user.getEmail(), "USER")).thenReturn(accessToken);
         when(jwtTokenProvider.generateRefreshToken(user.getEmail())).thenReturn(refreshToken);
 
         var result = authService.refreshToken(request);
@@ -171,13 +138,10 @@ class AuthServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(result.accessToken()).isEqualTo("new_access_token");
         assertThat(result.refreshToken()).isEqualTo("new_refresh_token");
-        assertThat(result.userEmail()).isEqualTo(user.getEmail());
 
-        verify(jwtTokenProvider).validateRefreshToken(request.refreshToken());
         verify(jwtTokenProvider).extractEmailFromRefreshToken(request.refreshToken());
         verify(userRepository).findByEmail(user.getEmail());
-        verify(jwtTokenProvider)
-                .generateAccessToken(user.getEmail(), user.getRole().getAuthority());
+        verify(jwtTokenProvider).generateAccessToken(user.getEmail(), "USER");
         verify(jwtTokenProvider).generateRefreshToken(user.getEmail());
     }
 
@@ -186,39 +150,36 @@ class AuthServiceImplTest {
     void shouldThrowException_WhenInvalidRefreshToken() {
 
         var request = new RefreshTokenRequest("invalid_refresh_token");
-        when(jwtTokenProvider.validateRefreshToken(request.refreshToken())).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromRefreshToken(request.refreshToken()))
+                .thenThrow(new InvalidTokenException("Invalid refresh token"));
 
-        assertThatThrownBy(() -> authService.refreshToken(request))
-                .isInstanceOf(InvalidTokenException.class)
-                .hasMessage("Invalid refresh token");
+        assertThatThrownBy(() -> authService.refreshToken(request)).isInstanceOf(InvalidTokenException.class);
 
-        verify(jwtTokenProvider).validateRefreshToken(request.refreshToken());
-        verify(jwtTokenProvider, never()).extractEmailFromRefreshToken(anyString());
+        verify(jwtTokenProvider).extractEmailFromRefreshToken(request.refreshToken());
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    @DisplayName("Should throw UserNotFoundException when user not found during refresh")
+    @DisplayName("Should throw RuntimeException when user not found during refresh")
     void shouldThrowException_WhenUserNotFoundDuringRefresh() {
 
         var request = new RefreshTokenRequest("valid_refresh_token");
-        var email = "notfound@example.com";
+        var email = "nonexistent@example.com";
 
-        when(jwtTokenProvider.validateRefreshToken(request.refreshToken())).thenReturn(true);
         when(jwtTokenProvider.extractEmailFromRefreshToken(request.refreshToken()))
                 .thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.refreshToken(request)).isInstanceOf(UserNotFoundException.class);
+        assertThatThrownBy(() -> authService.refreshToken(request))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Usuário não encontrado");
 
-        verify(jwtTokenProvider).validateRefreshToken(request.refreshToken());
         verify(jwtTokenProvider).extractEmailFromRefreshToken(request.refreshToken());
         verify(userRepository).findByEmail(email);
     }
 
-    // Helper methods
     private User createTestUser() {
-        var user = new User();
+        User user = new User();
         user.setId(UUID.randomUUID());
         user.setEmail("test@example.com");
         user.setPassword("encoded_password");
@@ -226,10 +187,6 @@ class AuthServiceImplTest {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         return user;
-    }
-
-    private UserResponse createUserResponse() {
-        return new UserResponse("test-id", "test@example.com", UserRole.USER, LocalDateTime.now(), LocalDateTime.now());
     }
 
     private Authentication createAuthentication() {

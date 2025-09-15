@@ -267,6 +267,8 @@ class ArchitectureTest {
                 .definedBy("..dto..")
                 .layer("Config")
                 .definedBy("..config..")
+                .layer("Util")
+                .definedBy("..util..")
                 .whereLayer("Controller")
                 .mayNotBeAccessedByAnyLayer()
                 .whereLayer("Service")
@@ -274,9 +276,11 @@ class ArchitectureTest {
                 .whereLayer("Repository")
                 .mayOnlyBeAccessedByLayers("Service", "Config")
                 .whereLayer("Domain")
-                .mayOnlyBeAccessedByLayers("Service", "Repository", "DTO", "Config")
+                .mayOnlyBeAccessedByLayers("Service", "Repository", "DTO", "Config", "Util")
                 .whereLayer("DTO")
                 .mayOnlyBeAccessedByLayers("Controller", "Service")
+                .whereLayer("Util")
+                .mayOnlyBeAccessedByLayers("Service", "Config")
                 .check(mainClasses);
     }
 }
