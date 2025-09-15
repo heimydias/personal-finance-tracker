@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         JwtToken accessToken = jwtTokenProvider.generateAccessToken(
-                user.getEmail(), user.getRole().name());
+                user.getEmail(), user.getRole().getAuthority());
         RefreshToken refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
         log.info("Login realizado com sucesso para usuário: {}", request.email());
@@ -59,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         JwtToken newAccessToken = jwtTokenProvider.generateAccessToken(
-                user.getEmail(), user.getRole().name());
+                user.getEmail(), user.getRole().getAuthority());
         RefreshToken newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
         log.info("Token renovado com sucesso para usuário: {}", user.getEmail());

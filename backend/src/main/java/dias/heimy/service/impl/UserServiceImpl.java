@@ -10,6 +10,7 @@ import dias.heimy.domain.exception.UserNotFoundException;
 import dias.heimy.dto.mapper.UserMapper;
 import dias.heimy.dto.request.UserRegisterRequest;
 import dias.heimy.dto.request.UserUpdateRequest;
+import dias.heimy.dto.response.PageResponse;
 import dias.heimy.dto.response.UserResponse;
 import dias.heimy.repository.UserRepository;
 import dias.heimy.service.UserService;
@@ -50,11 +51,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserResponse> listUsers(Pageable pageable, String authorizationHeader) {
+    public PageResponse<UserResponse> listUsers(Pageable pageable, String authorizationHeader) {
         log.info("Listando usuários com paginação: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
 
         Page<User> users = userRepository.findAll(pageable);
-        return users.map(userMapper::toResponse);
+        var userResponses =
+                users.getContent().stream().map(userMapper::toResponse).toList();
+
+        return PageResponse.of(users.getNumber(), users.getSize(), users.getTotalElements(), userResponses);
     }
 
     @Override

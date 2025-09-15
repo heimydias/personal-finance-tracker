@@ -5,6 +5,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 import dias.heimy.dto.request.UserRegisterRequest;
 import dias.heimy.dto.request.UserUpdateRequest;
+import dias.heimy.dto.response.PageResponse;
 import dias.heimy.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,8 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,12 +48,23 @@ public interface UserController {
     @ApiResponse(
             responseCode = "200",
             description = "Lista de usuários retornada com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class)))
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = PageResponse.class)))
     @ApiResponse(responseCode = "401", description = "Token de acesso inválido")
     @ApiResponse(responseCode = "403", description = "Usuário não possui permissão de administrador")
     @GetMapping
-    ResponseEntity<Page<UserResponse>> listUsers(
-            Pageable pageable,
+    ResponseEntity<PageResponse<UserResponse>> listUsers(
+            @Parameter(description = "Número da página (começa em 0)", example = "0")
+                    @RequestHeader(value = "page", defaultValue = "0")
+                    int page,
+            @Parameter(description = "Tamanho da página", example = "10")
+                    @RequestHeader(value = "size", defaultValue = "10")
+                    int size,
+            @Parameter(description = "Campo para ordenação", example = "email")
+                    @RequestHeader(value = "sort", required = false)
+                    String sort,
+            @Parameter(description = "Direção da ordenação (asc ou desc)", example = "asc")
+                    @RequestHeader(value = "order", defaultValue = "asc")
+                    String order,
             @Parameter(hidden = true) @RequestHeader(value = "Authorization") String authorizationHeader);
 
     @Operation(

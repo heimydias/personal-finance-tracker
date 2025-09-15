@@ -5,13 +5,14 @@ import static org.springframework.http.HttpStatus.CREATED;
 import dias.heimy.controller.UserController;
 import dias.heimy.dto.request.UserRegisterRequest;
 import dias.heimy.dto.request.UserUpdateRequest;
+import dias.heimy.dto.response.PageResponse;
 import dias.heimy.dto.response.UserResponse;
 import dias.heimy.service.UserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,10 +34,25 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Page<UserResponse>> listUsers(Pageable pageable, String authorizationHeader) {
-        log.info("Requisição para listar usuários recebida");
-        Page<UserResponse> users = userService.listUsers(pageable, authorizationHeader);
-        log.info("Lista de usuários retornada com {} elementos", users.getTotalElements());
+    public ResponseEntity<PageResponse<UserResponse>> listUsers(
+            int page, int size, String sort, String order, String authorizationHeader) {
+        log.info(
+                "Requisição para listar usuários recebida - page: {}, size: {}, sort: {}, order: {}",
+                page,
+                size,
+                sort,
+                order);
+
+        PageRequest pageable;
+        if (sort != null && !sort.trim().isEmpty()) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
+            pageable = PageRequest.of(page, size, Sort.by(direction, sort));
+        } else {
+            pageable = PageRequest.of(page, size);
+        }
+
+        PageResponse<UserResponse> users = userService.listUsers(pageable, authorizationHeader);
+        log.info("Lista de usuários retornada com {} elementos", users.elements());
         return ResponseEntity.ok(users);
     }
 
