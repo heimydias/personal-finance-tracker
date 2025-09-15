@@ -5,7 +5,6 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('USER');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -33,7 +32,7 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
     }
 
     try {
-      await authService.register(email, password, role);
+      await authService.register(email, password);
       setSuccess('Usuário cadastrado com sucesso! Redirecionando para login...');
       setTimeout(() => {
         onRegisterSuccess();
@@ -125,7 +124,7 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
             />
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
               Confirmar Senha:
             </label>
@@ -143,26 +142,6 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
               }}
               placeholder="Confirme sua senha"
             />
-          </div>
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-              Tipo de Usuário:
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem'
-              }}
-            >
-              <option value="USER">Usuário</option>
-              <option value="ADMIN">Administrador</option>
-            </select>
           </div>
 
           {error && (

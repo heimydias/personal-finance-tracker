@@ -25,6 +25,9 @@ personal-finance-tracker:
     validate-on-migrate: true
 
   jwt:
+    admin:
+      email: ${ADMIN_EMAIL}
+      password: ${ADMIN_PASSWORD}
     access-token:
       secret: ${JWT_ACCESS_TOKEN_SECRET}
       expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES}

@@ -59,6 +59,9 @@ openapi-servers-urls: ${personal-finance-tracker.openapi-servers-urls}
 
 app:
   jwt:
+    admin:
+      email: ${personal-finance-tracker.jwt.admin.email}
+      password: ${personal-finance-tracker.jwt.admin.password}
     access-token:
       secret: ${personal-finance-tracker.jwt.access-token.secret}
       expiration-minutes: ${personal-finance-tracker.jwt.access-token.expiration-minutes}
