@@ -109,7 +109,7 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
               Senha:
             </label>
             <input
-              type="password"
+              type="text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -129,7 +129,7 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
               Confirmar Senha:
             </label>
             <input
-              type="password"
+              type="text"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -153,7 +153,21 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
               border: '1px solid #fecaca',
               borderRadius: '4px'
             }}>
-              {error}
+              {Array.isArray(error) ? (
+                <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                  {error.map((err, index) => (
+                    <li key={index} style={{ marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+                      <span style={{ marginRight: '6px', fontSize: '14px' }}>❌</span>
+                      {err.replace(/^password:\s*/, '')}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ marginRight: '6px', fontSize: '14px' }}>❌</span>
+                  {error}
+                </div>
+              )}
             </div>
           )}
 

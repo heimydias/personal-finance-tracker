@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/personal-finance-tracker/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+console.log('API_BASE_URL:', API_BASE_URL);
 
 const authAPI = axios.create({
   baseURL: API_BASE_URL,
@@ -11,6 +13,9 @@ const authAPI = axios.create({
 
 authAPI.interceptors.request.use(
   (config) => {
+    console.log('Interceptor REQUEST - URL:', config.url);
+    console.log('Interceptor REQUEST - baseURL:', config.baseURL);
+    console.log('Interceptor REQUEST - full URL:', config.baseURL + config.url);
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -18,6 +23,7 @@ authAPI.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('Interceptor REQUEST ERROR:', error);
     return Promise.reject(error);
   }
 );
@@ -33,7 +39,7 @@ authAPI.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh-token`, {
             refreshToken: refreshToken
           });
 
@@ -60,11 +66,13 @@ authAPI.interceptors.response.use(
 export const authService = {
   async login(email, password) {
     try {
-      const response = await authAPI.post('/auth/login', {
+      console.log('Tentando login com:', { email, password });
+      const response = await authAPI.post('/api/v1/auth/token', {
         email,
         password,
       });
 
+      console.log('Response do login:', response.data);
       const { accessToken, refreshToken, userEmail, userRole } = response.data;
 
       localStorage.setItem('accessToken', accessToken);
@@ -74,6 +82,10 @@ export const authService = {
 
       return response.data;
     } catch (error) {
+      console.error('ERRO NO LOGIN:', error);
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+
       const errorData = error.response?.data;
       if (errorData) {
         let message = errorData.detail || errorData.message || 'Erro no login';
@@ -84,18 +96,23 @@ export const authService = {
           message = 'Este email já está em uso';
         }
 
-        throw { message };
+        throw new Error(message);
       }
-      throw { message: 'Erro no login' };
+      throw new Error('Erro no login');
     }
   },
 
   async register(email, password, role = 'USER') {
     try {
-      const response = await authAPI.post('/auth/register', {
+      // Para registro de usuário comum (sem autenticação)
+      const response = await axios.post(`${API_BASE_URL}/api/v1/users`, {
         email,
         password,
         role,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       return response.data;
     } catch (error) {
@@ -103,13 +120,50 @@ export const authService = {
       if (errorData) {
         let message = errorData.detail || errorData.message || 'Erro no registro';
 
-        if (message.includes('User already exists with email')) {
+        // Se tem fieldErrors, usar eles em vez da mensagem genérica
+        if (errorData.fieldErrors && errorData.fieldErrors.length > 0) {
+          message = errorData.fieldErrors;
+        } else if (message.includes('User already exists with email')) {
           message = 'Este email já está em uso';
         }
 
-        throw { message };
+        throw new Error(message);
       }
-      throw { message: 'Erro no registro' };
+      throw new Error('Erro no registro');
+    }
+  },
+
+  async registerAdmin(email, password) {
+    if (!this.isAuthenticated()) {
+      throw new Error('Você precisa estar logado para criar usuários admin');
+    }
+
+    const userInfo = this.getUserInfo();
+    if (userInfo.role !== 'ADMIN') {
+      throw new Error('Apenas administradores podem criar outros administradores');
+    }
+
+    try {
+      const response = await authAPI.post('/api/v1/users', {
+        email,
+        password,
+        role: 'ADMIN',
+      });
+      return response.data;
+    } catch (error) {
+      const errorData = error.response?.data;
+      if (errorData) {
+        let message = errorData.detail || errorData.message || 'Erro no registro de admin';
+
+        if (message.includes('User already exists with email')) {
+          message = 'Este email já está em uso';
+        } else if (message.includes('sem autenticação de admin válida')) {
+          message = 'Token de admin inválido ou expirado';
+        }
+
+        throw new Error(message);
+      }
+      throw new Error('Erro no registro de admin');
     }
   },
 
