@@ -80,7 +80,7 @@ export const authService = {
 
         if (message === 'Invalid email or password') {
           message = 'Email ou senha inválidos';
-        } else if (message.includes('email') && message.includes('already')) {
+        } else if (message.includes('User already exists with email')) {
           message = 'Este email já está em uso';
         }
 
@@ -101,7 +101,12 @@ export const authService = {
     } catch (error) {
       const errorData = error.response?.data;
       if (errorData) {
-        const message = errorData.detail || errorData.message || 'Erro no registro';
+        let message = errorData.detail || errorData.message || 'Erro no registro';
+
+        if (message.includes('User already exists with email')) {
+          message = 'Este email já está em uso';
+        }
+
         throw { message };
       }
       throw { message: 'Erro no registro' };
