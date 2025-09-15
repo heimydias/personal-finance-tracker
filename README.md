@@ -2,17 +2,17 @@
 
 Sistema de gerenciamento financeiro pessoal com autenticação JWT, controle de despesas e receitas, categorias personalizadas e relatórios financeiros.
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=coverage)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=bugs)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=souluanf_golden-raspberry-awards-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=alert_status&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=coverage&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=code_smells&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=ncloc&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=sqale_index&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=reliability_rating&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=duplicated_lines_density&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=vulnerabilities&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=bugs&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=security_rating&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=heimydias_personal-finance-tracker&metric=sqale_rating&token=b6ce94a17d4984b5ba72c334c6e61732ebff4d15)](https://sonarcloud.io/summary/new_code?id=heimydias_personal-finance-tracker)
 
 ## Sumário
 
