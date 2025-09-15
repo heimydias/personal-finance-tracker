@@ -26,8 +26,8 @@ services:
     restart: unless-stopped
   
   personal-finance-tracker.backend:
-    container_name: personal-finance-tracker.app
-    hostname: personal-finance-tracker.app
+    container_name: personal-finance-tracker.backend
+    hostname: personal-finance-tracker.backend
     build:
       context: backend
       dockerfile: Dockerfile

@@ -22,6 +22,9 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+*.bak
+*.swp
+*~
 
 # Git
 .git/
@@ -31,5 +34,20 @@ logs/
 Dockerfile
 .dockerignore
 
-# Maven wrapper (if not needed)
-.mvn/wrapper/maven-wrapper.jar
+# Test results
+surefire-reports/
+failsafe-reports/
+
+# Node.js (if any frontend build tools)
+node_modules/
+npm-debug.log
+
+# Maven local repository (handled by multi-stage build)
+.m2/
+
+# Keep essential files for Maven build
+!pom.xml
+!src/
+!.mvn/
+!mvnw
+!mvnw.cmd
