@@ -1,6 +1,7 @@
 package dias.heimy.controller.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -152,5 +153,59 @@ class UserControllerImplTest {
                 LocalDateTime.now(),
                 "SYSTEM",
                 "SYSTEM");
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when page is negative")
+    void shouldThrowException_WhenPageIsNegative() {
+        assertThatThrownBy(() -> userController.listUsers(-1, 10, "email", "asc", "Bearer token"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Número da página não pode ser negativo");
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when size is zero")
+    void shouldThrowException_WhenSizeIsZero() {
+        assertThatThrownBy(() -> userController.listUsers(0, 0, "email", "asc", "Bearer token"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Tamanho da página deve estar entre 1 e 100");
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when size is too large")
+    void shouldThrowException_WhenSizeIsTooLarge() {
+        assertThatThrownBy(() -> userController.listUsers(0, 101, "email", "asc", "Bearer token"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Tamanho da página deve estar entre 1 e 100");
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when order is invalid")
+    void shouldThrowException_WhenOrderIsInvalid() {
+        assertThatThrownBy(() -> userController.listUsers(0, 10, "email", "invalid", "Bearer token"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Ordem deve ser 'asc' ou 'desc'");
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when sort field is invalid")
+    void shouldThrowException_WhenSortFieldIsInvalid() {
+        assertThatThrownBy(() -> userController.listUsers(0, 10, "invalidField", "asc", "Bearer token"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Campo de ordenação inválido: invalidField");
+    }
+
+    @Test
+    @DisplayName("Should allow valid sort fields")
+    void shouldAllowValidSortFields() {
+        var pageResponse = PageResponse.<UserResponse>of(0, 10, 0, List.of());
+        when(userService.listUsers(any(Pageable.class), anyString())).thenReturn(pageResponse);
+
+        var validFields = List.of("email", "role", "createdAt", "updatedAt");
+
+        for (String field : validFields) {
+            var result = userController.listUsers(0, 10, field, "asc", "Bearer token");
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        }
     }
 }

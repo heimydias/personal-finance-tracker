@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -52,6 +54,20 @@ class ValidPasswordValidatorTest {
         verify(context, never()).disableDefaultConstraintViolation();
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "Pass1!", "mystr0ng123!", "MYSTR0NG123!", "MyStrong!", "MyStr0ng123"})
+    @DisplayName("Should return false for invalid passwords")
+    void shouldReturnFalse_ForInvalidPasswords(String invalidPassword) {
+
+        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
+        when(violationBuilder.addConstraintViolation()).thenReturn(context);
+
+        var result = validator.isValid(invalidPassword, context);
+
+        assertThat(result).isFalse();
+        verify(context).disableDefaultConstraintViolation();
+    }
+
     @Test
     @DisplayName("Should return false for null password")
     void shouldReturnFalse_ForNullPassword() {
@@ -65,94 +81,11 @@ class ValidPasswordValidatorTest {
         verify(context).disableDefaultConstraintViolation();
     }
 
-    @Test
-    @DisplayName("Should return false for empty password")
-    void shouldReturnFalse_ForEmptyPassword() {
+    @ParameterizedTest
+    @ValueSource(strings = {"Password123!", "123456", "admin", "qwerty123"})
+    @DisplayName("Should return false for common passwords")
+    void shouldReturnFalse_ForCommonPasswords(String commonPassword) {
 
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        when(violationBuilder.addConstraintViolation()).thenReturn(context);
-
-        var result = validator.isValid("", context);
-
-        assertThat(result).isFalse();
-        verify(context).disableDefaultConstraintViolation();
-    }
-
-    @Test
-    @DisplayName("Should return false for password too short")
-    void shouldReturnFalse_ForPasswordTooShort() {
-
-        var shortPassword = "Pass1!";
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        when(violationBuilder.addConstraintViolation()).thenReturn(context);
-
-        var result = validator.isValid(shortPassword, context);
-
-        assertThat(result).isFalse();
-        verify(context).disableDefaultConstraintViolation();
-    }
-
-    @Test
-    @DisplayName("Should return false for password without uppercase")
-    void shouldReturnFalse_ForPasswordWithoutUppercase() {
-
-        var passwordWithoutUpper = "mystr0ng123!";
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        when(violationBuilder.addConstraintViolation()).thenReturn(context);
-
-        var result = validator.isValid(passwordWithoutUpper, context);
-
-        assertThat(result).isFalse();
-        verify(context).disableDefaultConstraintViolation();
-    }
-
-    @Test
-    @DisplayName("Should return false for password without lowercase")
-    void shouldReturnFalse_ForPasswordWithoutLowercase() {
-
-        var passwordWithoutLower = "MYSTR0NG123!";
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        when(violationBuilder.addConstraintViolation()).thenReturn(context);
-
-        var result = validator.isValid(passwordWithoutLower, context);
-
-        assertThat(result).isFalse();
-        verify(context).disableDefaultConstraintViolation();
-    }
-
-    @Test
-    @DisplayName("Should return false for password without digits")
-    void shouldReturnFalse_ForPasswordWithoutDigits() {
-
-        var passwordWithoutDigits = "MyStrong!";
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        when(violationBuilder.addConstraintViolation()).thenReturn(context);
-
-        var result = validator.isValid(passwordWithoutDigits, context);
-
-        assertThat(result).isFalse();
-        verify(context).disableDefaultConstraintViolation();
-    }
-
-    @Test
-    @DisplayName("Should return false for password without special characters")
-    void shouldReturnFalse_ForPasswordWithoutSpecialChars() {
-
-        var passwordWithoutSpecial = "MyStr0ng123";
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        when(violationBuilder.addConstraintViolation()).thenReturn(context);
-
-        var result = validator.isValid(passwordWithoutSpecial, context);
-
-        assertThat(result).isFalse();
-        verify(context).disableDefaultConstraintViolation();
-    }
-
-    @Test
-    @DisplayName("Should return false for password with common patterns")
-    void shouldReturnFalse_ForPasswordWithCommonPatterns() {
-
-        var commonPassword = "Password123!";
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
         when(violationBuilder.addConstraintViolation()).thenReturn(context);
 
@@ -162,23 +95,10 @@ class ValidPasswordValidatorTest {
         verify(context).disableDefaultConstraintViolation();
     }
 
-    @Test
-    @DisplayName("Should return true for strong password with all requirements")
-    void shouldReturnTrue_ForStrongPassword() {
-
-        var strongPassword = "MyStr0ng@2024!";
-
-        var result = validator.isValid(strongPassword, context);
-
-        assertThat(result).isTrue();
-        verify(context, never()).disableDefaultConstraintViolation();
-    }
-
-    @Test
-    @DisplayName("Should return true for another valid password")
-    void shouldReturnTrue_ForAnotherValidPassword() {
-
-        var validPassword = "Secure123$Code";
+    @ParameterizedTest
+    @ValueSource(strings = {"MyStr0ng123!", "MyStr0ng@2024!", "Secure123$Code", "ValidP@ssw0rd!"})
+    @DisplayName("Should return true for valid strong passwords")
+    void shouldReturnTrue_ForValidPasswords(String validPassword) {
 
         var result = validator.isValid(validPassword, context);
 

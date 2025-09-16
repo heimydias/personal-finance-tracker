@@ -4,11 +4,9 @@ import static dias.heimy.domain.enums.UserRole.ADMIN;
 import static dias.heimy.domain.enums.UserRole.USER;
 
 import dias.heimy.domain.entity.User;
-import dias.heimy.domain.enums.UserRole;
 import dias.heimy.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

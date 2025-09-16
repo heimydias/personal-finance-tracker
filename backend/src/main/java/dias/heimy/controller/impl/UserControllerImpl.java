@@ -43,10 +43,13 @@ public class UserControllerImpl implements UserController {
                 sort,
                 order);
 
+        validatePaginationParameters(page, size, order);
+
         PageRequest pageable;
         if (sort != null && !sort.trim().isEmpty()) {
             Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
-            pageable = PageRequest.of(page, size, Sort.by(direction, sort));
+            String validatedSort = validateSortField(sort.trim());
+            pageable = PageRequest.of(page, size, Sort.by(direction, validatedSort));
         } else {
             pageable = PageRequest.of(page, size);
         }
@@ -78,5 +81,29 @@ public class UserControllerImpl implements UserController {
         userService.deleteUser(id, authorizationHeader);
         log.info("Usuário deletado com sucesso: {}", id);
         return ResponseEntity.noContent().build();
+    }
+
+    private void validatePaginationParameters(int page, int size, String order) {
+        if (page < 0) {
+            throw new IllegalArgumentException("Número da página não pode ser negativo");
+        }
+        if (size <= 0 || size > 100) {
+            throw new IllegalArgumentException("Tamanho da página deve estar entre 1 e 100");
+        }
+        if (order != null
+                && !order.trim().isEmpty()
+                && !"asc".equalsIgnoreCase(order.trim())
+                && !"desc".equalsIgnoreCase(order.trim())) {
+            throw new IllegalArgumentException("Ordem deve ser 'asc' ou 'desc'");
+        }
+    }
+
+    private String validateSortField(String sort) {
+        java.util.Set<String> validFields = java.util.Set.of("email", "role", "createdAt", "updatedAt");
+        if (!validFields.contains(sort)) {
+            throw new IllegalArgumentException(
+                    "Campo de ordenação inválido: " + sort + ". Campos válidos: " + String.join(", ", validFields));
+        }
+        return sort;
     }
 }
