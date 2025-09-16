@@ -144,7 +144,11 @@ class UserServiceImplTest {
 
         var result = userService.listUsers(pageable, "Bearer admin_token");
 
-        assertThat(result).hasSize(1);
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.pageNumber()).isEqualTo(0);
+        assertThat(result.pageSize()).isEqualTo(10);
+        assertThat(result.elements()).isEqualTo(1);
+        assertThat(result.hasNext()).isFalse();
         verify(userRepository).findAll(pageable);
     }
 

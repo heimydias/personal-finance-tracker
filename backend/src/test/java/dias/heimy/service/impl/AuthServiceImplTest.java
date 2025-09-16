@@ -66,7 +66,8 @@ class AuthServiceImplTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
-        when(jwtTokenProvider.generateAccessToken("test@example.com", "USER")).thenReturn(accessToken);
+        when(jwtTokenProvider.generateAccessToken("test@example.com", "ROLE_USER"))
+                .thenReturn(accessToken);
         when(jwtTokenProvider.generateRefreshToken(request.email())).thenReturn(refreshToken);
 
         var result = authService.login(request);
@@ -79,7 +80,7 @@ class AuthServiceImplTest {
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(userRepository).findByEmail(request.email());
-        verify(jwtTokenProvider).generateAccessToken("test@example.com", "USER");
+        verify(jwtTokenProvider).generateAccessToken("test@example.com", "ROLE_USER");
         verify(jwtTokenProvider).generateRefreshToken(request.email());
     }
 
@@ -130,7 +131,7 @@ class AuthServiceImplTest {
         when(jwtTokenProvider.extractEmailFromRefreshToken(request.refreshToken()))
                 .thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(jwtTokenProvider.generateAccessToken(user.getEmail(), "USER")).thenReturn(accessToken);
+        when(jwtTokenProvider.generateAccessToken(user.getEmail(), "ROLE_USER")).thenReturn(accessToken);
         when(jwtTokenProvider.generateRefreshToken(user.getEmail())).thenReturn(refreshToken);
 
         var result = authService.refreshToken(request);
@@ -141,7 +142,7 @@ class AuthServiceImplTest {
 
         verify(jwtTokenProvider).extractEmailFromRefreshToken(request.refreshToken());
         verify(userRepository).findByEmail(user.getEmail());
-        verify(jwtTokenProvider).generateAccessToken(user.getEmail(), "USER");
+        verify(jwtTokenProvider).generateAccessToken(user.getEmail(), "ROLE_USER");
         verify(jwtTokenProvider).generateRefreshToken(user.getEmail());
     }
 
