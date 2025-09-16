@@ -25,6 +25,8 @@ personal-finance-tracker:
     validate-on-migrate: true
 
   jwt:
+    users:
+      default-password: ${DEFAULT_PASSWORD}
     admin:
       email: ${ADMIN_EMAIL}
       password: ${ADMIN_PASSWORD}

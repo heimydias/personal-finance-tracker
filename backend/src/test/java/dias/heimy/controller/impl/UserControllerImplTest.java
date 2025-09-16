@@ -17,6 +17,7 @@ import dias.heimy.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,8 +73,9 @@ class UserControllerImplTest {
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isEqualTo(pageResponse);
+        Assertions.assertNotNull(result.getBody());
         assertThat(result.getBody().content()).hasSize(1);
-        assertThat(result.getBody().pageNumber()).isEqualTo(0);
+        assertThat(result.getBody().pageNumber()).isZero();
         assertThat(result.getBody().pageSize()).isEqualTo(10);
         verify(userService).listUsers(any(Pageable.class), eq("Bearer admin_token"));
     }

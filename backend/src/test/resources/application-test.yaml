@@ -16,6 +16,11 @@ personal-finance-tracker:
     properties:
       hibernate:
         enable_lazy_load_no_trans: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
     show-sql: true
     hibernate:
       ddl-auto: none
@@ -23,6 +28,19 @@ personal-finance-tracker:
     enabled: false
     clean-disabled: false
     validate-on-migrate: true
+
+  jwt:
+    users:
+      default-password: ${DEFAULT_PASSWORD}
+    admin:
+      email: ${ADMIN_EMAIL}
+      password: ${ADMIN_PASSWORD}
+    access-token:
+      secret: ${JWT_ACCESS_TOKEN_SECRET}
+      expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES}
+    refresh-token:
+      secret: ${JWT_REFRESH_TOKEN_SECRET}
+      expiration-days: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS}
 
   springdoc:
     swagger-ui:
