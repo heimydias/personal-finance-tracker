@@ -4,7 +4,6 @@ import static dias.heimy.domain.enums.UserRole.ADMIN;
 
 import dias.heimy.domain.entity.User;
 import dias.heimy.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,9 +37,11 @@ public class InitialUserConfig implements CommandLineRunner {
             log.info("Criando usuário administrador padrão: {}", adminEmail);
 
             User adminUser = new User();
+            adminUser.setName("System Admin");
             adminUser.setEmail(adminEmail);
             adminUser.setPassword(passwordEncoder.encode(adminPassword));
             adminUser.setRole(ADMIN);
+            adminUser.setIsSystemAdmin(true);
 
             userRepository.save(adminUser);
 

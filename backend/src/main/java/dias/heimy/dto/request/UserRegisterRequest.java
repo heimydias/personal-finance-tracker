@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "Request para registro de novo usuário")
 public record UserRegisterRequest(
+        @Schema(description = "Nome do usuário", example = "João Silva") @NotBlank(message = "Nome é obrigatório")
+                String name,
         @Schema(description = "Email do usuário", example = "newuser@example.com")
                 @NotBlank(message = "Email é obrigatório")
                 @Email(message = "Email deve ter formato válido")

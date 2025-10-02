@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 public record UserResponse(
         String id,
+        String name,
         String email,
         UserRole role,
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime createdAt,

@@ -47,6 +47,8 @@ public class AuthServiceImpl implements AuthService {
                 refreshToken.token(),
                 java.time.Duration.between(Instant.now(), accessToken.expiresAt())
                         .getSeconds(),
+                user.getId().toString(),
+                user.getName(),
                 user.getEmail(),
                 user.getRole().name());
     }
@@ -69,6 +71,8 @@ public class AuthServiceImpl implements AuthService {
                 newRefreshToken.token(),
                 java.time.Duration.between(Instant.now(), newAccessToken.expiresAt())
                         .getSeconds(),
+                user.getId().toString(),
+                user.getName(),
                 user.getEmail(),
                 user.getRole().name());
     }

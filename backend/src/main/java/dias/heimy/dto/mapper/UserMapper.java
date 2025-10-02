@@ -14,6 +14,7 @@ public interface UserMapper {
     UserResponse toResponse(User entity);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "isSystemAdmin", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)

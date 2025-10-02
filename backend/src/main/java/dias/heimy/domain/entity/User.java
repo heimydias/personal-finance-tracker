@@ -39,6 +39,9 @@ public class User {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
+    @Column(nullable = false)
+    private String name;
+
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -48,6 +51,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isSystemAdmin = false;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
