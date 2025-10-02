@@ -25,8 +25,7 @@ public class ValidPasswordValidator implements ConstraintValidator<ValidPassword
     @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {
         if (password == null || password.trim().isEmpty()) {
-            addCustomMessage(context, "Senha não pode ser nula ou vazia");
-            return false;
+            return true;
         }
 
         List<String> violations = new ArrayList<>();

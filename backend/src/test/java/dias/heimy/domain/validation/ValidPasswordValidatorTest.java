@@ -55,7 +55,7 @@ class ValidPasswordValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "   ", "Pass1!", "mystr0ng123!", "MYSTR0NG123!", "MyStrong!", "MyStr0ng123"})
+    @ValueSource(strings = {"Pass1!", "mystr0ng123!", "MYSTR0NG123!", "MyStrong!", "MyStr0ng123"})
     @DisplayName("Should return false for invalid passwords")
     void shouldReturnFalse_ForInvalidPasswords(String invalidPassword) {
 
@@ -69,16 +69,24 @@ class ValidPasswordValidatorTest {
     }
 
     @Test
-    @DisplayName("Should return false for null password")
-    void shouldReturnFalse_ForNullPassword() {
-
-        when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(violationBuilder);
-        when(violationBuilder.addConstraintViolation()).thenReturn(context);
+    @DisplayName("Should return true for null password (optional field)")
+    void shouldReturnTrue_ForNullPassword() {
 
         var result = validator.isValid(null, context);
 
-        assertThat(result).isFalse();
-        verify(context).disableDefaultConstraintViolation();
+        assertThat(result).isTrue();
+        verify(context, never()).disableDefaultConstraintViolation();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   "})
+    @DisplayName("Should return true for empty/blank password (optional field)")
+    void shouldReturnTrue_ForEmptyPassword(String emptyPassword) {
+
+        var result = validator.isValid(emptyPassword, context);
+
+        assertThat(result).isTrue();
+        verify(context, never()).disableDefaultConstraintViolation();
     }
 
     @ParameterizedTest

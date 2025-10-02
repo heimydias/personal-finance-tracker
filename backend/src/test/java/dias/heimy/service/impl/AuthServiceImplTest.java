@@ -75,6 +75,8 @@ class AuthServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(result.accessToken()).isEqualTo("access_token");
         assertThat(result.refreshToken()).isEqualTo("refresh_token");
+        assertThat(result.userId()).isEqualTo(user.getId().toString());
+        assertThat(result.userName()).isEqualTo(user.getName());
         assertThat(result.userEmail()).isEqualTo(user.getEmail());
         assertThat(result.userRole()).isEqualTo("USER");
 
@@ -182,6 +184,7 @@ class AuthServiceImplTest {
     private User createTestUser() {
         User user = new User();
         user.setId(UUID.randomUUID());
+        user.setName("Test User");
         user.setEmail("test@example.com");
         user.setPassword("encoded_password");
         user.setRole(UserRole.USER);

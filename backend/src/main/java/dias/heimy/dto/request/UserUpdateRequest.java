@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Email;
 
 @Schema(description = "Request para atualização de usuário")
 public record UserUpdateRequest(
+        @Schema(description = "Nome do usuário", example = "João Silva") String name,
         @Schema(description = "Email do usuário", example = "user@example.com")
                 @Email(message = "Email deve ter formato válido")
                 String email,

@@ -58,7 +58,7 @@ class UserServiceImplTest {
     @DisplayName("Should create user successfully when valid data provided")
     void shouldCreateUser_WhenValidData() {
 
-        var request = new UserRegisterRequest("test@example.com", "password123", UserRole.USER);
+        var request = new UserRegisterRequest("Test User", "test@example.com", "password123", UserRole.USER);
         var user = createTestUser();
         var savedUser = createTestUser();
         var expectedResponse = createUserResponse();
@@ -83,7 +83,7 @@ class UserServiceImplTest {
     @DisplayName("Should throw UserAlreadyExistsException when email already exists")
     void shouldThrowException_WhenEmailAlreadyExists() {
 
-        var request = new UserRegisterRequest("existing@example.com", "password123", UserRole.USER);
+        var request = new UserRegisterRequest("Existing User", "existing@example.com", "password123", UserRole.USER);
         when(userRepository.existsByEmail(request.email())).thenReturn(true);
 
         assertThatThrownBy(() -> userService.createUser(request, null)).isInstanceOf(UserAlreadyExistsException.class);
@@ -96,7 +96,7 @@ class UserServiceImplTest {
     @DisplayName("Should throw DomainException when creating ADMIN without authorization")
     void shouldThrowException_WhenCreatingAdminWithoutAuth() {
 
-        var request = new UserRegisterRequest("admin@example.com", "password123", UserRole.ADMIN);
+        var request = new UserRegisterRequest("Admin User", "admin@example.com", "password123", UserRole.ADMIN);
         when(userRepository.existsByEmail(request.email())).thenReturn(false);
 
         assertThatThrownBy(() -> userService.createUser(request, null))
@@ -111,7 +111,7 @@ class UserServiceImplTest {
     @DisplayName("Should create ADMIN when authenticated as admin")
     void shouldCreateAdmin_WhenAuthenticatedAsAdmin() {
 
-        var request = new UserRegisterRequest("admin@example.com", "password123", UserRole.ADMIN);
+        var request = new UserRegisterRequest("Admin User", "admin@example.com", "password123", UserRole.ADMIN);
         var user = createTestUser();
         user.setRole(UserRole.ADMIN);
         var savedUser = createTestUser();
@@ -213,7 +213,7 @@ class UserServiceImplTest {
     void shouldUpdateUser_WhenUserUpdatesOwnData() {
 
         var userId = UUID.randomUUID();
-        var request = new UserUpdateRequest("newemail@example.com", "newpassword", null);
+        var request = new UserUpdateRequest(null, "newemail@example.com", "newpassword", null);
         var existingUser = createTestUser();
         existingUser.setId(userId);
         existingUser.setEmail("user@example.com");
@@ -241,7 +241,7 @@ class UserServiceImplTest {
     void shouldThrowException_WhenUserTriesToChangeRole() {
 
         var userId = UUID.randomUUID();
-        var request = new UserUpdateRequest(null, null, UserRole.ADMIN);
+        var request = new UserUpdateRequest(null, null, null, UserRole.ADMIN);
         var existingUser = createTestUser();
         existingUser.setId(userId);
         existingUser.setEmail("user@example.com");
@@ -266,6 +266,7 @@ class UserServiceImplTest {
         var user = createTestUser();
         user.setId(userId);
         user.setEmail("user@example.com");
+        user.setIsSystemAdmin(false);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
@@ -276,6 +277,48 @@ class UserServiceImplTest {
         verify(userRepository).findById(userId);
         verify(userRepository).delete(user);
         verify(jwtTokenProvider).extractEmailFromToken("user_token");
+    }
+
+    @Test
+    @DisplayName("Should throw DomainException when trying to delete system admin")
+    void shouldThrowException_WhenDeletingSystemAdmin() {
+
+        var userId = UUID.randomUUID();
+        var systemAdmin = createTestUser();
+        systemAdmin.setId(userId);
+        systemAdmin.setIsSystemAdmin(true);
+        systemAdmin.setRole(UserRole.ADMIN);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(systemAdmin));
+
+        assertThatThrownBy(() -> userService.deleteUser(userId, "Bearer admin_token"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("O administrador padrão do sistema não pode ser deletado");
+
+        verify(userRepository).findById(userId);
+        verifyNoInteractions(jwtValidationUtil, jwtTokenProvider);
+    }
+
+    @Test
+    @DisplayName("Should throw DomainException when trying to change system admin role")
+    void shouldThrowException_WhenChangingSystemAdminRole() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, null, null, UserRole.USER);
+        var systemAdmin = createTestUser();
+        systemAdmin.setId(userId);
+        systemAdmin.setIsSystemAdmin(true);
+        systemAdmin.setRole(UserRole.ADMIN);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(systemAdmin));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer admin_token")).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer admin_token"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("O perfil do administrador padrão do sistema não pode ser alterado");
+
+        verify(userRepository).findById(userId);
+        verify(jwtValidationUtil).isAdminAuthenticated("Bearer admin_token");
     }
 
     @Test
@@ -321,6 +364,7 @@ class UserServiceImplTest {
     private User createTestUser() {
         User user = new User();
         user.setId(UUID.randomUUID());
+        user.setName("Test User");
         user.setEmail("test@example.com");
         user.setPassword("encoded_password");
         user.setRole(UserRole.USER);
@@ -334,6 +378,7 @@ class UserServiceImplTest {
     private UserResponse createUserResponse() {
         return new UserResponse(
                 "test-id",
+                "Test User",
                 "test@example.com",
                 UserRole.USER,
                 LocalDateTime.now(),

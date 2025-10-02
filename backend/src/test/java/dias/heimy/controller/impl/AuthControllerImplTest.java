@@ -33,7 +33,7 @@ class AuthControllerImplTest {
 
         var request = new LoginRequest("test@example.com", "password123");
         var expectedResponse = new AuthenticationResponse(
-                "access_token", "refresh_token", "Bearer", 3600L, "test@example.com", "USER");
+                "access_token", "refresh_token", "Bearer", 3600L, "uuid", "Test User", "test@example.com", "USER");
 
         when(authService.login(any(LoginRequest.class))).thenReturn(expectedResponse);
 
@@ -50,7 +50,14 @@ class AuthControllerImplTest {
 
         var request = new RefreshTokenRequest("valid_refresh_token");
         var expectedResponse = new AuthenticationResponse(
-                "new_access_token", "new_refresh_token", "Bearer", 3600L, "test@example.com", "USER");
+                "new_access_token",
+                "new_refresh_token",
+                "Bearer",
+                3600L,
+                "uuid",
+                "Test User",
+                "test@example.com",
+                "USER");
 
         when(authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(expectedResponse);
 

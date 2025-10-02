@@ -42,9 +42,10 @@ class UserControllerImplTest {
     @DisplayName("Should create user successfully when valid data provided")
     void shouldCreateUser_WhenValidData() {
 
-        var request = new UserRegisterRequest("test@example.com", "password123", UserRole.USER);
+        var request = new UserRegisterRequest("Test User", "test@example.com", "password123", UserRole.USER);
         var expectedResponse = new UserResponse(
                 "test-id",
+                "Test User",
                 "test@example.com",
                 UserRole.USER,
                 LocalDateTime.now(),
@@ -117,7 +118,7 @@ class UserControllerImplTest {
     void shouldUpdateUser_WhenValidData() {
 
         var userId = UUID.randomUUID();
-        var updateRequest = new UserUpdateRequest("newemail@example.com", "newpassword", UserRole.USER);
+        var updateRequest = new UserUpdateRequest(null, "newemail@example.com", "newpassword", UserRole.USER);
         var updatedResponse = createUserResponse();
 
         when(userService.updateUser(userId, updateRequest, "Bearer token")).thenReturn(updatedResponse);
@@ -147,6 +148,7 @@ class UserControllerImplTest {
     private UserResponse createUserResponse() {
         return new UserResponse(
                 "test-id",
+                "Test User",
                 "test@example.com",
                 UserRole.USER,
                 LocalDateTime.now(),
