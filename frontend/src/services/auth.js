@@ -69,10 +69,12 @@ export const authService = {
       });
 
       console.log('Response do login:', response.data);
-      const { accessToken, refreshToken, userEmail, userRole } = response.data;
+      const { accessToken, refreshToken, userId, userName, userEmail, userRole } = response.data;
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('userName', userName);
       localStorage.setItem('userEmail', userEmail);
       localStorage.setItem('userRole', userRole);
 
@@ -98,9 +100,10 @@ export const authService = {
     }
   },
 
-  async register(email, password, role = 'USER') {
+  async register(name, email, password, role = 'USER') {
     try {
       const response = await authAPI.post('/v1/users', {
+        name,
         email,
         password,
         role,
@@ -124,7 +127,7 @@ export const authService = {
     }
   },
 
-  async registerAdmin(email, password) {
+  async registerAdmin(name, email, password) {
     if (!this.isAuthenticated()) {
       throw new Error('Você precisa estar logado para criar usuários admin');
     }
@@ -136,6 +139,7 @@ export const authService = {
 
     try {
       const response = await authAPI.post('/v1/users', {
+        name,
         email,
         password,
         role: 'ADMIN',
@@ -161,6 +165,8 @@ export const authService = {
   logout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userRole');
   },
@@ -171,6 +177,8 @@ export const authService = {
 
   getUserInfo() {
     return {
+      id: localStorage.getItem('userId'),
+      name: localStorage.getItem('userName'),
       email: localStorage.getItem('userEmail'),
       role: localStorage.getItem('userRole'),
     };
