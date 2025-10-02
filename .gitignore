@@ -1,0 +1,62 @@
+# Build artifacts
+backend/target/
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE files
+.idea/
+../.idea
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# OS files
+.DS_Store
+*.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Test results
+surefire-reports/
+failsafe-reports/
+
+# Node.js
+node_modules/
+npm-debug.log
+
+# Documentation
+HELP.md

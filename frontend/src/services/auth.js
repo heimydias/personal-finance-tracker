@@ -1,11 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
-console.log('API_BASE_URL:', API_BASE_URL);
-
 const authAPI = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '/personal-finance-tracker/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -39,7 +35,7 @@ authAPI.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh-token`, {
+          const response = await authAPI.post('/v1/auth/refresh-token', {
             refreshToken: refreshToken
           });
 
@@ -67,7 +63,7 @@ export const authService = {
   async login(email, password) {
     try {
       console.log('Tentando login com:', { email, password });
-      const response = await authAPI.post('/api/v1/auth/token', {
+      const response = await authAPI.post('/v1/auth/token', {
         email,
         password,
       });
@@ -104,15 +100,10 @@ export const authService = {
 
   async register(email, password, role = 'USER') {
     try {
-      // Para registro de usuário comum (sem autenticação)
-      const response = await axios.post(`${API_BASE_URL}/api/v1/users`, {
+      const response = await authAPI.post('/v1/users', {
         email,
         password,
         role,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
       });
       return response.data;
     } catch (error) {
@@ -144,7 +135,7 @@ export const authService = {
     }
 
     try {
-      const response = await authAPI.post('/api/v1/users', {
+      const response = await authAPI.post('/v1/users', {
         email,
         password,
         role: 'ADMIN',
