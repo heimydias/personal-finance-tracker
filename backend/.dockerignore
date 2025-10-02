@@ -1,0 +1,34 @@
+# Build artifacts
+target/
+*.jar
+*.war
+*.ear
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+
+# Logs
+*.log
+
+# Test results
+surefire-reports/
+failsafe-reports/
+
+# Maven wrapper jar (keep it)
+.mvn/wrapper/*.jar
+!.mvn/wrapper/maven-wrapper.jar

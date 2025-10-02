@@ -64,8 +64,6 @@ openapi-servers-urls: ${personal-finance-tracker.openapi-servers-urls}
 
 app:
   jwt:
-    users:
-      default-password: ${personal-finance-tracker.jwt.users.default-password}
     admin:
       email: ${personal-finance-tracker.jwt.admin.email}
       password: ${personal-finance-tracker.jwt.admin.password}
@@ -81,3 +79,4 @@ logging:
     console: "%red(%d{yyyy-MM-dd'T'HH:mm:ssXXX}) %magenta([%thread]) [${spring.application.name}, %X{traceId:-}, %X{spanId:-}] %highlight(%-5level) %logger{36}.%M - %msg%n"
   level:
     org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+    io.undertow.websockets.jsr: ERROR

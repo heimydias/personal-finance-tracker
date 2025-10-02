@@ -135,11 +135,16 @@ docker-compose up -d
 
 ### Autenticação
 
-Após a inicialização da aplicação, é necessário criar um perfil de administrador e obter o token de autenticação para fazer as requisições aos endpoints protegidos.
+Após a inicialização da aplicação, um usuário administrador padrão é criado automaticamente.
 
-1. **Criar usuário admin:** Use o endpoint `/auth/register` para criar um usuário com perfil ADMIN (já retorna o token)
-2. **Obter token:** Use o endpoint `/auth/login` para obter o token JWT
-3. **Usar token:** Adicione o token no header `Authorization: Bearer {token}` em todas as requisições
+**Credenciais padrão:**
+- **Email:** admin@admin.com
+- **Senha:** admin123
+
+**Para usar a API:**
+
+1. **Fazer login:** Use o endpoint `/auth/login` com as credenciais padrão para obter o token JWT
+2. **Usar token:** Adicione o token no header `Authorization: Bearer {token}` em todas as requisições protegidas
 
 ## Contato
 
