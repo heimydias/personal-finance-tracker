@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
 
-const Login = ({ onLoginSuccess, onGoToRegister }) => {
+const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ const Login = ({ onLoginSuccess, onGoToRegister }) => {
 
     try {
       await authService.login(email, password);
-      onLoginSuccess();
+      navigate('/');
     } catch (error) {
       setError(error.message || 'Erro ao fazer login');
     } finally {
@@ -144,7 +146,7 @@ const Login = ({ onLoginSuccess, onGoToRegister }) => {
             Não tem uma conta?
           </p>
           <button
-            onClick={onGoToRegister}
+            onClick={() => navigate('/register')}
             style={{
               background: 'none',
               border: 'none',

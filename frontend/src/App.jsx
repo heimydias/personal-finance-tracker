@@ -1,71 +1,123 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
+import UserProfile from './components/UserProfile';
+import UsersList from './components/UsersList';
+import UserView from './components/UserView';
+import UserForm from './components/UserForm';
+import TransactionsList from './components/TransactionsList';
+import TransactionForm from './components/TransactionForm';
+import MonthlyBalance from './components/MonthlyBalance';
+import ProtectedRoute from './components/ProtectedRoute';
 import { authService } from './services/auth';
 import './App.css';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setIsAuthenticated(authService.isAuthenticated());
-    setLoading(false);
-  }, []);
-
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-    setShowRegister(false);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setShowRegister(false);
-  };
-
-  const handleGoToRegister = () => {
-    setShowRegister(true);
-  };
-
-  const handleBackToLogin = () => {
-    setShowRegister(false);
-  };
-
-  const handleRegisterSuccess = () => {
-    setShowRegister(false);
-  };
-
-  if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh'
-      }}>
-        Carregando...
-      </div>
-    );
-  }
-
   return (
-    <div className="App">
-      {isAuthenticated ? (
-        <Dashboard onLogout={handleLogout} />
-      ) : showRegister ? (
-        <Register
-          onRegisterSuccess={handleRegisterSuccess}
-          onBackToLogin={handleBackToLogin}
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            authService.isAuthenticated() ? <Navigate to="/" replace /> : <Login />
+          }
         />
-      ) : (
-        <Login
-          onLoginSuccess={handleLoginSuccess}
-          onGoToRegister={handleGoToRegister}
+        <Route
+          path="/register"
+          element={
+            authService.isAuthenticated() ? <Navigate to="/" replace /> : <Register />
+          }
         />
-      )}
-    </div>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute requireAdmin>
+              <UsersList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users/new"
+          element={
+            <ProtectedRoute requireAdmin>
+              <UserForm isNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users/:id"
+          element={
+            <ProtectedRoute requireAdmin>
+              <UserView />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users/:id/edit"
+          element={
+            <ProtectedRoute>
+              <UserForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <TransactionsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions/new"
+          element={
+            <ProtectedRoute>
+              <TransactionForm isNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions/:id/edit"
+          element={
+            <ProtectedRoute>
+              <TransactionForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/balance"
+          element={
+            <ProtectedRoute>
+              <MonthlyBalance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <Navigate to={authService.isAuthenticated() ? "/" : "/login"} replace />
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -1,107 +1,92 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
+import Header from './Header';
 
-const Dashboard = ({ onLogout }) => {
+const Dashboard = () => {
+  const navigate = useNavigate();
   const userInfo = authService.getUserInfo();
 
   useEffect(() => {
     document.title = 'PFT - Dashboard';
   }, []);
 
-  const handleLogout = () => {
-    authService.logout();
-    onLogout();
-  };
-
   return (
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f0f9ff'
     }}>
-      <div style={{
-        backgroundColor: '#2563eb',
-        padding: '1rem 0',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <h1 style={{
-          textAlign: 'center',
-          color: 'white',
-          margin: 0,
-          fontSize: '1.5rem'
-        }}>
-          Personal Finance Tracker
-        </h1>
-      </div>
+      <Header />
 
       <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: 'calc(100vh - 60px)',
-        paddingTop: '2rem'
+        maxWidth: '800px',
+        margin: '0 auto',
+        padding: '0 1rem',
       }}>
         <div style={{
           background: 'white',
-          padding: '3rem',
+          padding: '2rem',
           borderRadius: '12px',
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          width: '100%',
-          maxWidth: '500px',
-          textAlign: 'center'
+          marginBottom: '2rem',
         }}>
-          <div style={{
-            fontSize: '3rem',
-            marginBottom: '1rem'
-          }}>
-            ✅
-          </div>
-
           <h2 style={{
             color: '#059669',
-            marginBottom: '1rem',
-            fontSize: '2rem'
+            marginBottom: '2rem',
+            fontSize: '2rem',
+            textAlign: 'center',
           }}>
-            Login realizado com sucesso!
+            Bem-vindo, {userInfo.name}!
           </h2>
 
-          <p style={{
-            color: '#6b7280',
-            marginBottom: '2rem',
-            fontSize: '1.1rem'
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '1rem',
           }}>
-            Bem-vindo!
-          </p>
+            <button
+              onClick={() => navigate('/transactions')}
+              style={{
+                padding: '1.5rem',
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <span style={{ fontSize: '2rem' }}>💳</span>
+              <span>Transações</span>
+            </button>
 
-        <div style={{
-          backgroundColor: '#f3f4f6',
-          padding: '1rem',
-          borderRadius: '8px',
-          marginBottom: '2rem'
-        }}>
-          <p style={{ margin: '0.5rem 0', fontWeight: 'bold' }}>
-            📧 Email: {userInfo.email}
-          </p>
-          <p style={{ margin: '0.5rem 0', fontWeight: 'bold' }}>
-            👤 Perfil: {userInfo.role}
-          </p>
+            <button
+              onClick={() => navigate('/balance')}
+              style={{
+                padding: '1.5rem',
+                backgroundColor: '#f59e0b',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <span style={{ fontSize: '2rem' }}>📊</span>
+              <span>Saldo Mensal</span>
+            </button>
+          </div>
         </div>
-
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '0.75rem 2rem',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          Sair
-        </button>
-      </div>
       </div>
     </div>
   );

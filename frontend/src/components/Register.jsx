@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
 
-const Register = ({ onRegisterSuccess, onBackToLogin }) => {
+const Register = () => {
+  const navigate = useNavigate();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,10 +35,10 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
     }
 
     try {
-      await authService.register(email, password);
+      await authService.register(name, email, password);
       setSuccess('Usuário cadastrado com sucesso! Redirecionando para login...');
       setTimeout(() => {
-        onRegisterSuccess();
+        navigate('/login');
       }, 2000);
     } catch (error) {
       setError(error.message || 'Erro ao criar conta');
@@ -84,6 +87,26 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
           </h2>
 
         <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              Nome:
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '1rem'
+              }}
+              placeholder="Digite seu nome"
+            />
+          </div>
+
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
               Email:
@@ -205,7 +228,7 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
 
           <button
             type="button"
-            onClick={onBackToLogin}
+            onClick={() => navigate('/login')}
             style={{
               width: '100%',
               padding: '0.75rem',
