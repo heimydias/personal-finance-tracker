@@ -36,10 +36,11 @@ public class DomainException extends BusinessException {
     @Override
     public ExceptionType getType() {
         return switch (errorCode) {
-            case USER_ALREADY_EXISTS, USER_NOT_FOUND -> ExceptionType.CONFLICT;
+            case USER_ALREADY_EXISTS, USER_NOT_FOUND, TRANSACTION_NOT_FOUND -> ExceptionType.CONFLICT;
             case ADMIN_AUTH_REQUIRED, ADMIN_AUTH_INSUFFICIENT, INVALID_CREDENTIALS, INVALID_TOKEN, TOKEN_EXPIRED ->
                 ExceptionType.AUTHENTICATION;
             case VALIDATION_ERROR -> ExceptionType.VALIDATION;
+            case OPERATION_NOT_PERMITTED, UNAUTHORIZED_ACCESS -> ExceptionType.AUTHORIZATION;
         };
     }
 }
