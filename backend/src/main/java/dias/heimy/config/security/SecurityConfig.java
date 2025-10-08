@@ -2,6 +2,9 @@ package dias.heimy.config.security;
 
 import static dias.heimy.constants.PathConstants.AUTH_REFRESH_TOKEN;
 import static dias.heimy.constants.PathConstants.AUTH_TOKEN;
+import static dias.heimy.constants.PathConstants.TRANSACTIONS;
+import static dias.heimy.constants.PathConstants.TRANSACTIONS_BALANCE;
+import static dias.heimy.constants.PathConstants.TRANSACTIONS_BY_ID;
 import static dias.heimy.constants.PathConstants.USERS;
 import static dias.heimy.constants.PathConstants.USERS_BY_ID;
 import static org.springframework.http.HttpMethod.DELETE;
@@ -70,6 +73,18 @@ public class SecurityConfig {
                         .requestMatchers(PUT, USERS_BY_ID)
                         .authenticated()
                         .requestMatchers(DELETE, USERS_BY_ID)
+                        .authenticated()
+                        .requestMatchers(POST, TRANSACTIONS)
+                        .authenticated()
+                        .requestMatchers(GET, TRANSACTIONS)
+                        .authenticated()
+                        .requestMatchers(GET, TRANSACTIONS_BY_ID)
+                        .authenticated()
+                        .requestMatchers(PUT, TRANSACTIONS_BY_ID)
+                        .authenticated()
+                        .requestMatchers(DELETE, TRANSACTIONS_BY_ID)
+                        .authenticated()
+                        .requestMatchers(GET, TRANSACTIONS_BALANCE)
                         .authenticated()
                         .anyRequest()
                         .authenticated())

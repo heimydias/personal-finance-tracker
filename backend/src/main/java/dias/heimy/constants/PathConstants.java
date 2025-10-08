@@ -13,4 +13,8 @@ public class PathConstants {
 
     public static final String USERS = API + "/users";
     public static final String USERS_BY_ID = USERS + "/{id}";
+
+    public static final String TRANSACTIONS = API + "/transactions";
+    public static final String TRANSACTIONS_BY_ID = TRANSACTIONS + "/{id}";
+    public static final String TRANSACTIONS_BALANCE = TRANSACTIONS + "/balance";
 }
