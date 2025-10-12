@@ -3,6 +3,7 @@ package dias.heimy.controller.impl;
 import dias.heimy.controller.TransactionController;
 import dias.heimy.dto.request.TransactionRequest;
 import dias.heimy.dto.response.MonthlyBalanceResponse;
+import dias.heimy.dto.response.PageResponse;
 import dias.heimy.dto.response.TransactionResponse;
 import dias.heimy.service.TransactionService;
 import java.util.UUID;
@@ -37,12 +38,15 @@ public class TransactionControllerImpl implements TransactionController {
     }
 
     @Override
-    public ResponseEntity<Page<TransactionResponse>> listTransactions(Pageable pageable, String authorizationHeader) {
+    public ResponseEntity<PageResponse<TransactionResponse>> listTransactions(
+            Pageable pageable, String authorizationHeader) {
         log.info(
                 "Requisição para listar transações - page: {}, size: {}",
                 pageable.getPageNumber(),
                 pageable.getPageSize());
-        Page<TransactionResponse> response = transactionService.listTransactions(pageable, authorizationHeader);
+        Page<TransactionResponse> page = transactionService.listTransactions(pageable, authorizationHeader);
+        PageResponse<TransactionResponse> response =
+                PageResponse.of(page.getNumber(), page.getSize(), page.getTotalElements(), page.getContent());
         return ResponseEntity.ok(response);
     }
 

@@ -31,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
+    private static final String TRANSACTION_NOT_FOUND_MESSAGE = "Transação não encontrada: ";
+
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final TransactionMapper transactionMapper;
@@ -63,7 +65,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = transactionRepository
                 .findById(id)
-                .orElseThrow(() -> new DomainException(TRANSACTION_NOT_FOUND, "Transação não encontrada: " + id));
+                .orElseThrow(() -> new DomainException(TRANSACTION_NOT_FOUND, TRANSACTION_NOT_FOUND_MESSAGE + id));
 
         validateTransactionOwnership(transaction, user);
 
@@ -90,7 +92,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = transactionRepository
                 .findById(id)
-                .orElseThrow(() -> new DomainException(TRANSACTION_NOT_FOUND, "Transação não encontrada: " + id));
+                .orElseThrow(() -> new DomainException(TRANSACTION_NOT_FOUND, TRANSACTION_NOT_FOUND_MESSAGE + id));
 
         validateTransactionOwnership(transaction, user);
 
@@ -109,7 +111,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = transactionRepository
                 .findById(id)
-                .orElseThrow(() -> new DomainException(TRANSACTION_NOT_FOUND, "Transação não encontrada: " + id));
+                .orElseThrow(() -> new DomainException(TRANSACTION_NOT_FOUND, TRANSACTION_NOT_FOUND_MESSAGE + id));
 
         validateTransactionOwnership(transaction, user);
 

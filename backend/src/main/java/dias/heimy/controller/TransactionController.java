@@ -5,6 +5,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 import dias.heimy.dto.request.TransactionRequest;
 import dias.heimy.dto.response.MonthlyBalanceResponse;
+import dias.heimy.dto.response.PageResponse;
 import dias.heimy.dto.response.TransactionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,7 +49,7 @@ public interface TransactionController {
             summary = "Listar transações do usuário",
             security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping
-    ResponseEntity<Page<TransactionResponse>> listTransactions(
+    ResponseEntity<PageResponse<TransactionResponse>> listTransactions(
             Pageable pageable, @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader);
 
     @Operation(
