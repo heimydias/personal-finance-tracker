@@ -34,24 +34,20 @@ public class ValidPasswordValidator implements ConstraintValidator<ValidPassword
             violations.add(String.format("deve ter pelo menos %d caracteres", minLength));
         }
 
-        if (requireUppercase && !password.matches(".*[A-Z].*")) {
+        if (requireUppercase && !containsUppercase(password)) {
             violations.add("deve conter pelo menos uma letra maiúscula");
         }
 
-        if (requireLowercase && !password.matches(".*[a-z].*")) {
+        if (requireLowercase && !containsLowercase(password)) {
             violations.add("deve conter pelo menos uma letra minúscula");
         }
 
-        if (requireDigit && !password.matches(".*\\d.*")) {
+        if (requireDigit && !containsDigit(password)) {
             violations.add("deve conter pelo menos um dígito");
         }
 
-        if (requireSpecialChar && !password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) {
+        if (requireSpecialChar && !containsSpecialChar(password)) {
             violations.add("deve conter pelo menos um caractere especial");
-        }
-
-        if (isCommonPassword(password)) {
-            violations.add("não pode ser uma senha comum");
         }
 
         if (!violations.isEmpty()) {
@@ -63,16 +59,45 @@ public class ValidPasswordValidator implements ConstraintValidator<ValidPassword
         return true;
     }
 
+    private boolean containsUppercase(String password) {
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isUpperCase(password.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsLowercase(String password) {
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isLowerCase(password.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsDigit(String password) {
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isDigit(password.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsSpecialChar(String password) {
+        String specialChars = "!@#$%^&*()_+-=[]{};\':\"\\|,.<>/?";
+        for (int i = 0; i < password.length(); i++) {
+            if (specialChars.indexOf(password.charAt(i)) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void addCustomMessage(ConstraintValidatorContext context, String message) {
         context.disableDefaultConstraintViolation();
         context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-    }
-
-    private boolean isCommonPassword(String password) {
-        String lowerPassword = password.toLowerCase();
-        return lowerPassword.contains("password")
-                || lowerPassword.equals("123456")
-                || lowerPassword.equals("admin")
-                || lowerPassword.contains("qwerty");
     }
 }

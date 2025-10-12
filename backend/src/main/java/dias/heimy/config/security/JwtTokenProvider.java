@@ -46,13 +46,6 @@ public class JwtTokenProvider {
         this.refreshTokenExpirationDays = refreshTokenExpirationDays;
     }
 
-    public JwtToken generateAccessToken(Authentication authentication) {
-        String email = authentication.getName();
-        String role = authentication.getAuthorities().iterator().next().getAuthority();
-
-        return generateAccessToken(email, role);
-    }
-
     public JwtToken generateAccessToken(String email, String role) {
         Instant issuedAt = Instant.now();
         Instant expiresAt = issuedAt.plus(accessTokenExpirationMinutes, ChronoUnit.MINUTES);

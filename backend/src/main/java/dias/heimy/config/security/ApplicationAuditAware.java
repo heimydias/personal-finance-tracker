@@ -7,6 +7,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,7 @@ public class ApplicationAuditAware implements AuditorAware<String> {
 
     private static final String SYSTEM_USER = "SYSTEM";
 
+    @NonNull
     @Override
     public Optional<String> getCurrentAuditor() {
         Authentication authentication = getContext().getAuthentication();
