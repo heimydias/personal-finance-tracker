@@ -63,6 +63,8 @@ springdoc:
 openapi-servers-urls: ${personal-finance-tracker.openapi-servers-urls}
 
 app:
+  cors:
+    allowed-origins: ${personal-finance-tracker.cors.allowed-origins}
   jwt:
     admin:
       email: ${personal-finance-tracker.jwt.admin.email}

@@ -24,6 +24,9 @@ personal-finance-tracker:
     clean-disabled: false
     validate-on-migrate: true
 
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
   jwt:
     admin:
       email: ${ADMIN_EMAIL}
