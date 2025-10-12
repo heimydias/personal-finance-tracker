@@ -3,6 +3,7 @@ package dias.heimy.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -100,6 +101,21 @@ class UserServiceImplTest {
         when(userRepository.existsByEmail(request.email())).thenReturn(false);
 
         assertThatThrownBy(() -> userService.createUser(request, null))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Apenas administradores logados podem criar usuários ADMIN");
+
+        verify(userRepository).existsByEmail(request.email());
+        verifyNoInteractions(userMapper, passwordEncoder);
+    }
+
+    @Test
+    @DisplayName("Should throw DomainException when creating ADMIN with empty authorization header")
+    void shouldThrowException_WhenCreatingAdminWithEmptyAuthorizationHeader() {
+
+        var request = new UserRegisterRequest("Admin User", "admin@example.com", "password123", UserRole.ADMIN);
+        when(userRepository.existsByEmail(request.email())).thenReturn(false);
+
+        assertThatThrownBy(() -> userService.createUser(request, "   "))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("Apenas administradores logados podem criar usuários ADMIN");
 
@@ -217,7 +233,6 @@ class UserServiceImplTest {
         var existingUser = createTestUser();
         existingUser.setId(userId);
         existingUser.setEmail("user@example.com");
-        var updatedUser = createTestUser();
         var expectedResponse = createUserResponse();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
@@ -225,8 +240,8 @@ class UserServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
         when(userRepository.existsByEmail("newemail@example.com")).thenReturn(false);
         when(passwordEncoder.encode("newpassword")).thenReturn("encoded_new_password");
-        when(userRepository.save(existingUser)).thenReturn(updatedUser);
-        when(userMapper.toResponse(updatedUser)).thenReturn(expectedResponse);
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
 
         var result = userService.updateUser(userId, request, "Bearer user_token");
 
@@ -344,6 +359,254 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should throw DomainException when trying to create ADMIN with invalid token")
+    void shouldThrowException_WhenCreatingAdminWithInvalidToken() {
+
+        var request = new UserRegisterRequest("Admin User", "admin@example.com", "password123", UserRole.ADMIN);
+        when(userRepository.existsByEmail(request.email())).thenReturn(false);
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer invalid_token")).thenReturn(false);
+
+        assertThatThrownBy(() -> userService.createUser(request, "Bearer invalid_token"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Apenas administradores podem criar outros administradores");
+
+        verify(userRepository).existsByEmail(request.email());
+        verify(jwtValidationUtil).isAdminAuthenticated("Bearer invalid_token");
+    }
+
+    @Test
+    @DisplayName("Should admin update any user data")
+    void shouldAdminUpdateAnyUserData() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest("New Name", null, null, null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("anyuser@example.com");
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer admin_token")).thenReturn(true);
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        var result = userService.updateUser(userId, request, "Bearer admin_token");
+
+        assertThat(result).isEqualTo(expectedResponse);
+        verify(jwtValidationUtil).isAdminAuthenticated("Bearer admin_token");
+        verifyNoInteractions(jwtTokenProvider);
+    }
+
+    @Test
+    @DisplayName("Should update user with password when password provided")
+    void shouldUpdateUser_WhenPasswordProvided() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, null, "newpassword123", null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
+        when(passwordEncoder.encode("newpassword123")).thenReturn("encoded_new_password");
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        var result = userService.updateUser(userId, request, "Bearer user_token");
+
+        assertThat(result).isEqualTo(expectedResponse);
+        verify(passwordEncoder).encode("newpassword123");
+    }
+
+    @Test
+    @DisplayName("Should update user with name when name provided")
+    void shouldUpdateUser_WhenNameProvided() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest("New Name", null, null, null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        var result = userService.updateUser(userId, request, "Bearer user_token");
+
+        assertThat(result).isEqualTo(expectedResponse);
+        assertThat(existingUser.getName()).isEqualTo("New Name");
+    }
+
+    @Test
+    @DisplayName("Should not update name when name is empty")
+    void shouldNotUpdateName_WhenNameIsEmpty() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest("", null, null, null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        existingUser.setName("Original Name");
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        userService.updateUser(userId, request, "Bearer user_token");
+
+        assertThat(existingUser.getName()).isEqualTo("Original Name");
+    }
+
+    @Test
+    @DisplayName("Should not update password when password is empty")
+    void shouldNotUpdatePassword_WhenPasswordIsEmpty() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, null, "  ", null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        existingUser.setPassword("original_password");
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        userService.updateUser(userId, request, "Bearer user_token");
+
+        assertThat(existingUser.getPassword()).isEqualTo("original_password");
+    }
+
+    @Test
+    @DisplayName("Should admin change user role successfully")
+    void shouldAdminChangeUserRole() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, null, null, UserRole.ADMIN);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        existingUser.setRole(UserRole.USER);
+        existingUser.setIsSystemAdmin(false);
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer admin_token")).thenReturn(true);
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        var result = userService.updateUser(userId, request, "Bearer admin_token");
+
+        assertThat(existingUser.getRole()).isEqualTo(UserRole.ADMIN);
+        assertThat(result).isEqualTo(expectedResponse);
+        verify(jwtValidationUtil, org.mockito.Mockito.times(2)).isAdminAuthenticated("Bearer admin_token");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when non-admin authentication inconsistent during role change")
+    void shouldThrowException_WhenNonAdminAuthenticationInconsistentDuringRoleChange() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, null, null, UserRole.ADMIN);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        existingUser.setRole(UserRole.USER);
+        existingUser.setIsSystemAdmin(false);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer admin_token"))
+                .thenReturn(true)
+                .thenReturn(false);
+
+        assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer admin_token"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Apenas administradores podem alterar roles de usuários");
+
+        verify(jwtValidationUtil, org.mockito.Mockito.times(2)).isAdminAuthenticated("Bearer admin_token");
+    }
+
+    @Test
+    @DisplayName("Should not update when email is the same")
+    void shouldNotUpdateEmail_WhenEmailIsTheSame() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, "user@example.com", null, null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        userService.updateUser(userId, request, "Bearer user_token");
+
+        verify(userRepository, org.mockito.Mockito.never()).existsByEmail(anyString());
+    }
+
+    @Test
+    @DisplayName("Should not update role when role is the same")
+    void shouldNotUpdateRole_WhenRoleIsTheSame() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, null, null, UserRole.USER);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+        existingUser.setRole(UserRole.USER);
+        var expectedResponse = createUserResponse();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
+        when(userRepository.save(existingUser)).thenReturn(createTestUser());
+        when(userMapper.toResponse(any(User.class))).thenReturn(expectedResponse);
+
+        userService.updateUser(userId, request, "Bearer user_token");
+
+        assertThat(existingUser.getRole()).isEqualTo(UserRole.USER);
+    }
+
+    @Test
+    @DisplayName("Should throw DomainException when updating to existing email")
+    void shouldThrowException_WhenUpdatingToExistingEmail() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest(null, "existing@example.com", null, null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("user@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
+        when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer user_token"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Email já existe: existing@example.com");
+
+        verify(userRepository).existsByEmail("existing@example.com");
+    }
+
+    @Test
     @DisplayName("Should throw DomainException when invalid token format")
     void shouldThrowException_WhenInvalidTokenFormat() {
 
@@ -355,6 +618,47 @@ class UserServiceImplTest {
         when(jwtValidationUtil.isAdminAuthenticated("invalid_token")).thenReturn(false);
 
         assertThatThrownBy(() -> userService.getUserById(userId, "invalid_token"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Token de autorização inválido");
+
+        verify(userRepository).findById(userId);
+    }
+
+    @Test
+    @DisplayName("Should throw DomainException when non-admin tries to update other user data")
+    void shouldThrowException_WhenNonAdminTriesToUpdateOtherUserData() {
+
+        var userId = UUID.randomUUID();
+        var request = new UserUpdateRequest("New Name", null, null, null);
+        var existingUser = createTestUser();
+        existingUser.setId(userId);
+        existingUser.setEmail("owner@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(jwtValidationUtil.isAdminAuthenticated("Bearer user_token")).thenReturn(false);
+        when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("other@example.com");
+
+        assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer user_token"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Usuários só podem atualizar seus próprios dados");
+
+        verify(userRepository).findById(userId);
+        verify(jwtValidationUtil).isAdminAuthenticated("Bearer user_token");
+        verify(jwtTokenProvider).extractEmailFromToken("user_token");
+    }
+
+    @Test
+    @DisplayName("Should throw DomainException when authorization header is null")
+    void shouldThrowException_WhenAuthorizationHeaderIsNull() {
+
+        var userId = UUID.randomUUID();
+        var user = createTestUser();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(jwtValidationUtil.isAdminAuthenticated(null)).thenReturn(false);
+
+        assertThatThrownBy(() -> userService.getUserById(userId, null))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("Token de autorização inválido");
 

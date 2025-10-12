@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -190,6 +192,30 @@ class UserControllerImplTest {
     }
 
     @Test
+    @DisplayName("Should list users without sorting when order is only whitespace")
+    void shouldListUsers_WhenOrderIsWhitespace() {
+        var pageResponse = PageResponse.<UserResponse>of(0, 10, 0, List.of());
+        when(userService.listUsers(any(Pageable.class), anyString())).thenReturn(pageResponse);
+
+        var result = userController.listUsers(0, 10, "email", "   ", "Bearer token");
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(userService).listUsers(any(Pageable.class), eq("Bearer token"));
+    }
+
+    @Test
+    @DisplayName("Should list users without sorting when sort is empty string")
+    void shouldListUsers_WhenSortIsEmptyString() {
+        var pageResponse = PageResponse.<UserResponse>of(0, 10, 0, List.of());
+        when(userService.listUsers(any(Pageable.class), anyString())).thenReturn(pageResponse);
+
+        var result = userController.listUsers(0, 10, "", "asc", "Bearer token");
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(userService).listUsers(any(Pageable.class), eq("Bearer token"));
+    }
+
+    @Test
     @DisplayName("Should throw IllegalArgumentException when sort field is invalid")
     void shouldThrowException_WhenSortFieldIsInvalid() {
         assertThatThrownBy(() -> userController.listUsers(0, 10, "invalidField", "asc", "Bearer token"))
@@ -209,5 +235,32 @@ class UserControllerImplTest {
             var result = userController.listUsers(0, 10, field, "asc", "Bearer token");
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         }
+    }
+
+    @ParameterizedTest(name = "Should handle sort and order parameters: sort=''{0}'', order=''{1}''")
+    @CsvSource(
+            delimiterString = "|",
+            nullValues = {"NULL"},
+            value = {
+                "email|desc",
+                "role|DESC",
+                "email| asc ",
+                " email |asc",
+                "email|NULL",
+                "email|",
+                "email|   ",
+                "|asc",
+                "   |asc",
+                "   |desc"
+            })
+    @DisplayName("Should handle various sort and order parameter combinations")
+    void shouldHandleVariousSortAndOrderParameters(String sort, String order) {
+        var pageResponse = PageResponse.<UserResponse>of(0, 10, 0, List.of());
+        when(userService.listUsers(any(Pageable.class), anyString())).thenReturn(pageResponse);
+
+        var result = userController.listUsers(0, 10, sort, order, "Bearer token");
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(userService).listUsers(any(Pageable.class), eq("Bearer token"));
     }
 }

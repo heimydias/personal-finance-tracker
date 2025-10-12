@@ -108,4 +108,66 @@ class JwtValidationUtilTest {
 
         assertThat(result).isEqualTo(UserRole.ADMIN);
     }
+
+    @Test
+    @DisplayName("Should return true when admin token has ROLE_ADMIN format")
+    void shouldReturnTrue_WhenAdminTokenHasRoleAdminFormat() {
+
+        var authHeader = "Bearer valid_admin_token";
+        when(jwtTokenProvider.validateToken("valid_admin_token")).thenReturn(true);
+        when(jwtTokenProvider.extractRoleFromToken("valid_admin_token")).thenReturn("ROLE_ADMIN");
+
+        var result = jwtValidationUtil.isAdminAuthenticated(authHeader);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should return false when auth header has only whitespace")
+    void shouldReturnFalse_WhenAuthHeaderIsWhitespace() {
+
+        var result = jwtValidationUtil.isAdminAuthenticated("   ");
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should return USER role when requested role is null")
+    void shouldReturnUserRole_WhenRequestedRoleIsNull() {
+
+        var result = jwtValidationUtil.determineUserRole(null, "Bearer token");
+
+        assertThat(result).isEqualTo(UserRole.USER);
+    }
+
+    @Test
+    @DisplayName("Should return USER role when auth header is empty")
+    void shouldReturnUserRole_WhenAuthHeaderIsEmpty() {
+
+        var result = jwtValidationUtil.determineUserRole(UserRole.ADMIN, "");
+
+        assertThat(result).isEqualTo(UserRole.USER);
+    }
+
+    @Test
+    @DisplayName("Should return USER role when auth header is whitespace")
+    void shouldReturnUserRole_WhenAuthHeaderIsWhitespace() {
+
+        var result = jwtValidationUtil.determineUserRole(UserRole.ADMIN, "   ");
+
+        assertThat(result).isEqualTo(UserRole.USER);
+    }
+
+    @Test
+    @DisplayName("Should determine ADMIN role when token has ROLE_ADMIN format")
+    void shouldDetermineAdminRole_WhenTokenHasRoleAdminFormat() {
+
+        var authHeader = "Bearer valid_admin_token";
+        when(jwtTokenProvider.validateToken("valid_admin_token")).thenReturn(true);
+        when(jwtTokenProvider.extractRoleFromToken("valid_admin_token")).thenReturn("ROLE_ADMIN");
+
+        var result = jwtValidationUtil.determineUserRole(UserRole.ADMIN, authHeader);
+
+        assertThat(result).isEqualTo(UserRole.ADMIN);
+    }
 }
