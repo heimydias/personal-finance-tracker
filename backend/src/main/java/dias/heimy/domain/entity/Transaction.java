@@ -1,6 +1,7 @@
 package dias.heimy.domain.entity;
 
 import dias.heimy.domain.enums.TransactionType;
+import dias.heimy.domain.enums.TransferType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -59,6 +60,10 @@ public class Transaction {
 
     @Column(length = 500)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private TransferType transferType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

@@ -1,7 +1,6 @@
 package dias.heimy.service;
 
 import dias.heimy.dto.request.TransactionRequest;
-import dias.heimy.dto.response.MonthlyBalanceResponse;
 import dias.heimy.dto.response.TransactionResponse;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -18,6 +17,4 @@ public interface TransactionService {
     TransactionResponse updateTransaction(UUID id, TransactionRequest request, String authorizationHeader);
 
     void deleteTransaction(UUID id, String authorizationHeader);
-
-    MonthlyBalanceResponse getMonthlyBalance(int year, int month, String authorizationHeader);
 }
