@@ -1,0 +1,14 @@
+CREATE TABLE balance (
+    id BINARY(16) PRIMARY KEY,
+    user_id BINARY(16) NOT NULL UNIQUE,
+    total_income DECIMAL(19,2) NOT NULL DEFAULT 0.00,
+    total_expense DECIMAL(19,2) NOT NULL DEFAULT 0.00,
+    account_balance DECIMAL(19,2) NOT NULL DEFAULT 0.00,
+    savings_balance DECIMAL(19,2) NOT NULL DEFAULT 0.00,
+    total_balance DECIMAL(19,2) NOT NULL DEFAULT 0.00,
+    version BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_balance_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_balance_user_id (user_id)
+);
