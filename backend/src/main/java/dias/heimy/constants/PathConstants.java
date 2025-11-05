@@ -17,4 +17,11 @@ public class PathConstants {
     public static final String TRANSACTIONS = API + "/transactions";
     public static final String TRANSACTIONS_BY_ID = TRANSACTIONS + "/{id}";
     public static final String TRANSACTIONS_BALANCE = TRANSACTIONS + "/balance";
+
+    public static final String SAVINGS = API + "/savings";
+    public static final String SAVINGS_BY_ID = SAVINGS + "/{id}";
+    public static final String SAVINGS_YIELD = SAVINGS + "/{id}/yield";
+
+    public static final String BALANCE = API + "/balance";
+    public static final String BALANCE_MONTHLY = BALANCE + "/monthly";
 }
