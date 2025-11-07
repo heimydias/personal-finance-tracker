@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { transactionsService } from '../services/transactions';
+import { balanceService } from '../services/balance';
 import Header from './Header';
 import Card from './common/Card';
 import { colors } from '../theme/colors';
@@ -21,7 +21,7 @@ const MonthlyBalance = () => {
     try {
       setLoading(true);
       setError('');
-      const data = await transactionsService.getMonthlyBalance(year, month);
+      const data = await balanceService.getMonthlyBalance(year, month);
       setBalance(data);
     } catch (err) {
       setError(err.message);
@@ -137,9 +137,10 @@ const MonthlyBalance = () => {
                 {getMonthName(balance.month)} de {balance.year}
               </h3>
 
+              {/* Cards de Receitas e Despesas do Período */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridTemplateColumns: 'repeat(2, 1fr)',
                 gap: '1rem',
                 marginBottom: '2rem',
               }}>
@@ -161,7 +162,7 @@ const MonthlyBalance = () => {
                     fontWeight: 'bold',
                     marginBottom: '0.5rem',
                   }}>
-                    RECEITAS
+                    RECEITAS DO MÊS
                   </div>
                   <div style={{
                     fontSize: '1.25rem',
@@ -190,7 +191,7 @@ const MonthlyBalance = () => {
                     fontWeight: 'bold',
                     marginBottom: '0.5rem',
                   }}>
-                    DESPESAS
+                    DESPESAS DO MÊS
                   </div>
                   <div style={{
                     fontSize: '1.25rem',
@@ -200,9 +201,57 @@ const MonthlyBalance = () => {
                     {formatCurrency(balance.totalExpense)}
                   </div>
                 </div>
+              </div>
 
+              {/* Card de Saldo do Período */}
+              <div style={{
+                backgroundColor: balance.balance >= 0 ? '#dbeafe' : '#fef3c7',
+                padding: '1.5rem',
+                borderRadius: '8px',
+                textAlign: 'center',
+                marginBottom: '2rem',
+                border: balance.balance >= 0 ? '2px solid #3b82f6' : '2px solid #f59e0b',
+              }}>
                 <div style={{
-                  backgroundColor: balance.balance >= 0 ? '#dbeafe' : '#fef3c7',
+                  fontSize: '2rem',
+                  marginBottom: '0.5rem',
+                }}>
+                  {balance.balance >= 0 ? '💰' : '⚠️'}
+                </div>
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: balance.balance >= 0 ? '#1e3a8a' : '#92400e',
+                  fontWeight: 'bold',
+                  marginBottom: '0.5rem',
+                }}>
+                  SALDO DO PERÍODO
+                </div>
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: balance.balance >= 0 ? '#2563eb' : '#d97706',
+                }}>
+                  {formatCurrency(balance.balance)}
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: balance.balance >= 0 ? '#1e40af' : '#92400e',
+                  marginTop: '0.5rem',
+                }}>
+                  (Receitas - Despesas - Poupança)
+                </div>
+              </div>
+
+              {/* Cards de Saldos Acumulados */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '1rem',
+                marginBottom: '2rem',
+              }}>
+                {/* Saldo em Conta */}
+                <div style={{
+                  backgroundColor: '#e0f2fe',
                   padding: '1.5rem',
                   borderRadius: '8px',
                   textAlign: 'center',
@@ -211,38 +260,85 @@ const MonthlyBalance = () => {
                     fontSize: '2rem',
                     marginBottom: '0.5rem',
                   }}>
-                    {balance.balance >= 0 ? '💰' : '⚠️'}
+                    💳
                   </div>
                   <div style={{
                     fontSize: '0.875rem',
-                    color: balance.balance >= 0 ? '#1e3a8a' : '#92400e',
+                    color: '#075985',
                     fontWeight: 'bold',
                     marginBottom: '0.5rem',
                   }}>
-                    SALDO
+                    SALDO EM CONTA
                   </div>
                   <div style={{
                     fontSize: '1.25rem',
                     fontWeight: 'bold',
-                    color: balance.balance >= 0 ? '#2563eb' : '#d97706',
+                    color: '#0284c7',
                   }}>
-                    {formatCurrency(balance.balance)}
+                    {formatCurrency(balance.accountBalance)}
+                  </div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: '#0369a1',
+                    marginTop: '0.5rem',
+                  }}>
+                    Saldo acumulado até {getMonthName(balance.month)}
+                  </div>
+                </div>
+
+                {/* Saldo em Poupança */}
+                <div style={{
+                  backgroundColor: balance.monthlySavingsBalance > 0 ? '#d1fae5' : '#f3f4f6',
+                  padding: '1.5rem',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{
+                    fontSize: '2rem',
+                    marginBottom: '0.5rem',
+                  }}>
+                    🏦
+                  </div>
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: balance.monthlySavingsBalance > 0 ? '#065f46' : '#6b7280',
+                    fontWeight: 'bold',
+                    marginBottom: '0.5rem',
+                  }}>
+                    SALDO EM POUPANÇA
+                  </div>
+                  <div style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold',
+                    color: balance.monthlySavingsBalance > 0 ? '#059669' : '#6b7280',
+                  }}>
+                    {formatCurrency(balance.monthlySavingsBalance)}
+                  </div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    color: balance.monthlySavingsBalance > 0 ? '#047857' : '#9ca3af',
+                    marginTop: '0.5rem',
+                  }}>
+                    Saldo em poupança do mês
                   </div>
                 </div>
               </div>
 
+              {/* Resumo */}
               <div style={{
                 backgroundColor: '#f3f4f6',
                 padding: '1rem',
                 borderRadius: '6px',
-                textAlign: 'center',
               }}>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>
+                <p style={{ margin: '0 0 0.5rem 0', color: '#6b7280', fontSize: '0.875rem' }}>
                   {balance.balance >= 0 ? (
-                    <>✅ Saldo positivo! Você está no caminho certo.</>
+                    <>✅ <strong>Saldo do período positivo!</strong> Suas receitas superaram as despesas em {getMonthName(balance.month)}.</>
                   ) : (
-                    <>⚠️ Atenção: suas despesas superaram suas receitas este mês.</>
+                    <>⚠️ <strong>Atenção:</strong> Suas despesas superaram suas receitas em {getMonthName(balance.month)}.</>
                   )}
+                </p>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.75rem' }}>
+                  Os saldos em conta e poupança mostram sua situação atual consolidada (não apenas deste mês).
                 </p>
               </div>
             </div>

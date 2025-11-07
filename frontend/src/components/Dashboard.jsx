@@ -66,7 +66,49 @@ const Dashboard = () => {
             </button>
 
             <button
+              onClick={() => navigate('/savings')}
+              style={{
+                padding: '1.5rem',
+                backgroundColor: '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <span style={{ fontSize: '2rem' }}>🏦</span>
+              <span>Poupanças</span>
+            </button>
+
+            <button
               onClick={() => navigate('/balance')}
+              style={{
+                padding: '1.5rem',
+                backgroundColor: '#8b5cf6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <span style={{ fontSize: '2rem' }}>💎</span>
+              <span>Saldo Consolidado</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/balance/monthly')}
               style={{
                 padding: '1.5rem',
                 backgroundColor: '#f59e0b',
