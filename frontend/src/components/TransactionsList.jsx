@@ -115,13 +115,16 @@ const TransactionsList = () => {
                   <td style={{ padding: '1rem' }}>
                     <span style={{
                       padding: '0.25rem 0.75rem',
-                      backgroundColor: transaction.type === 'INCOME' ? '#d1fae5' : '#fee2e2',
-                      color: transaction.type === 'INCOME' ? '#065f46' : '#991b1b',
+                      backgroundColor: transaction.type === 'INCOME' ? '#d1fae5' :
+                                      transaction.type === 'TRANSFER' ? '#dbeafe' : '#fee2e2',
+                      color: transaction.type === 'INCOME' ? '#065f46' :
+                            transaction.type === 'TRANSFER' ? '#1e40af' : '#991b1b',
                       borderRadius: '12px',
                       fontSize: '0.875rem',
                       fontWeight: 'bold',
                     }}>
-                      {transaction.type === 'INCOME' ? 'Receita' : 'Despesa'}
+                      {transaction.type === 'INCOME' ? 'Receita' :
+                       transaction.type === 'TRANSFER' ? 'Transferência' : 'Despesa'}
                     </span>
                   </td>
                   <td style={{ padding: '1rem', fontWeight: '500' }}>{transaction.category}</td>
@@ -129,9 +132,11 @@ const TransactionsList = () => {
                     padding: '1rem',
                     textAlign: 'right',
                     fontWeight: 'bold',
-                    color: transaction.type === 'INCOME' ? '#059669' : '#dc2626',
+                    color: transaction.type === 'INCOME' ? '#059669' :
+                          transaction.type === 'TRANSFER' ? '#2563eb' : '#dc2626',
                   }}>
-                    {transaction.type === 'INCOME' ? '+' : '-'} {formatCurrency(transaction.amount)}
+                    {transaction.type === 'INCOME' ? '+' :
+                     transaction.type === 'TRANSFER' ? '↔' : '-'} {formatCurrency(transaction.amount)}
                   </td>
                   <td style={{ padding: '1rem', color: '#6b7280', maxWidth: '200px' }}>
                     {transaction.description ? (
@@ -141,22 +146,32 @@ const TransactionsList = () => {
                     ) : '-'}
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                      <Button
-                        onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
-                        variant="success"
-                        size="small"
-                      >
-                        ✏️ Editar
-                      </Button>
-                      <Button
-                        onClick={() => confirmDelete(transaction)}
-                        variant="danger"
-                        size="small"
-                      >
-                        🗑 Deletar
-                      </Button>
-                    </div>
+                    {transaction.type === 'TRANSFER' ? (
+                      <span style={{
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        fontStyle: 'italic'
+                      }}>
+                        Gerenciada pelo sistema
+                      </span>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                        <Button
+                          onClick={() => navigate(`/transactions/${transaction.id}/edit`)}
+                          variant="success"
+                          size="small"
+                        >
+                          ✏️ Editar
+                        </Button>
+                        <Button
+                          onClick={() => confirmDelete(transaction)}
+                          variant="danger"
+                          size="small"
+                        >
+                          🗑 Deletar
+                        </Button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

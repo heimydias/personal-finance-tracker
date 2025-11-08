@@ -9,6 +9,9 @@ import UserView from './components/UserView';
 import UserForm from './components/UserForm';
 import TransactionsList from './components/TransactionsList';
 import TransactionForm from './components/TransactionForm';
+import SavingsList from './components/SavingsList';
+import SavingsForm from './components/SavingsForm';
+import CurrentBalance from './components/CurrentBalance';
 import MonthlyBalance from './components/MonthlyBalance';
 import ProtectedRoute from './components/ProtectedRoute';
 import { authService } from './services/auth';
@@ -103,7 +106,39 @@ function App() {
           }
         />
         <Route
+          path="/savings"
+          element={
+            <ProtectedRoute>
+              <SavingsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/savings/new"
+          element={
+            <ProtectedRoute>
+              <SavingsForm isNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/savings/:id/edit"
+          element={
+            <ProtectedRoute>
+              <SavingsForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/balance"
+          element={
+            <ProtectedRoute>
+              <CurrentBalance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/balance/monthly"
           element={
             <ProtectedRoute>
               <MonthlyBalance />
