@@ -4,7 +4,7 @@ import static dias.heimy.domain.enums.ErrorCode.TRANSFER_TRANSACTION_NOT_MODIFIA
 
 import java.io.Serial;
 
-public class TransferTransactionNotModifiableException extends DomainException {
+public class TransferTransactionNotModifiableException extends BusinessException {
 
     private static final String MESSAGE =
             "Transações do tipo TRANSFER são gerenciadas automaticamente pelo sistema e não podem ser modificadas ou deletadas manualmente. Use os endpoints de poupança para gerenciar suas economias.";

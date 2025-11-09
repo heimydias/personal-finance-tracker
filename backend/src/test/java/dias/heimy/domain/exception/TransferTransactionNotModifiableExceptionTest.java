@@ -32,12 +32,12 @@ class TransferTransactionNotModifiableExceptionTest {
     }
 
     @Test
-    @DisplayName("Should be instance of DomainException")
-    void shouldBeInstanceOfDomainException() {
+    @DisplayName("Should be instance of BusinessException")
+    void shouldBeInstanceOfBusinessException() {
 
         var exception = new TransferTransactionNotModifiableException();
 
-        assertThat(exception).isInstanceOf(DomainException.class);
+        assertThat(exception).isInstanceOf(BusinessException.class);
     }
 
     @Test

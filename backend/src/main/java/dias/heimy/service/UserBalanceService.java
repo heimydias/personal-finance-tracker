@@ -1,7 +1,6 @@
 package dias.heimy.service;
 
 import dias.heimy.domain.entity.User;
-import dias.heimy.domain.entity.UserBalance;
 import dias.heimy.domain.enums.TransactionType;
 import dias.heimy.dto.response.MonthlyBalanceResponse;
 import dias.heimy.dto.response.UserBalanceResponse;
@@ -15,10 +14,6 @@ public interface UserBalanceService {
     MonthlyBalanceResponse getMonthlyBalance(int year, int month, String authorizationHeader);
 
     BigDecimal getAccountBalanceUntilDate(User user, LocalDate date);
-
-    UserBalance getUserBalanceOrCreateDefault(User user);
-
-    UserBalance getUserBalanceWithLockOrCreateDefault(UUID userId);
 
     void updateBalanceAfterTransaction(UUID userId, TransactionType type, BigDecimal amount);
 

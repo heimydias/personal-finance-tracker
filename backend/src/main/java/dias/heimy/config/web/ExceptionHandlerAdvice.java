@@ -5,17 +5,14 @@ import static dias.heimy.constants.ExceptionHandlerAdviceConstants.TIMESTAMP_PRO
 import static java.lang.String.format;
 import static java.time.LocalTime.now;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ProblemDetail.forStatusAndDetail;
 import static org.springframework.http.ResponseEntity.status;
 
 import dias.heimy.domain.enums.ErrorCode;
 import dias.heimy.domain.exception.BusinessException;
-import dias.heimy.domain.exception.DomainException;
 import dias.heimy.domain.exception.InvalidTokenException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
@@ -48,10 +45,6 @@ public class ExceptionHandlerAdvice {
         problemDetail.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         problemDetail.setProperty(ERROR_CODE_PROPERTY, exception.getErrorCode());
         problemDetail.setProperty("httpStatus", status.name());
-
-        if ((status == UNAUTHORIZED || status == CONFLICT) && exception instanceof DomainException domainEx) {
-            problemDetail.setProperty("errorCode", domainEx.getErrorCode());
-        }
 
         return status(status).body(problemDetail);
     }

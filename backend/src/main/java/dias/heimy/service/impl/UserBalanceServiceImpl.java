@@ -10,6 +10,7 @@ import dias.heimy.dto.response.UserBalanceResponse;
 import dias.heimy.repository.TransactionRepository;
 import dias.heimy.repository.UserBalanceRepository;
 import dias.heimy.repository.UserRepository;
+import dias.heimy.service.UserBalanceLockService;
 import dias.heimy.service.UserBalanceService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserBalanceLockService userBalanceLockService;
 
     @Override
     @Transactional(readOnly = true)
@@ -193,24 +195,14 @@ public class UserBalanceServiceImpl implements UserBalanceService {
         return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
 
-    public UserBalance getUserBalanceOrCreateDefault(User user) {
+    private UserBalance getUserBalanceOrCreateDefault(User user) {
         return userBalanceRepository.findByUserId(user.getId()).orElseGet(() -> createDefaultBalance(user));
     }
 
     @Override
     @Transactional
-    public UserBalance getUserBalanceWithLockOrCreateDefault(UUID userId) {
-        return userBalanceRepository.findByUserIdWithLock(userId).orElseGet(() -> {
-            User user = userRepository.findById(userId).orElseThrow();
-            UserBalance newBalance = createDefaultBalance(user);
-            return userBalanceRepository.save(newBalance);
-        });
-    }
-
-    @Override
-    @Transactional
     public void updateBalanceAfterTransaction(UUID userId, TransactionType type, BigDecimal amount) {
-        UserBalance userBalance = getUserBalanceWithLockOrCreateDefault(userId);
+        UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId);
 
         BigDecimal totalIncome = userBalance.getTotalIncome();
         BigDecimal totalExpense = userBalance.getTotalExpense();
@@ -236,7 +228,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     @Override
     @Transactional
     public void revertBalanceAfterTransactionDelete(UUID userId, TransactionType type, BigDecimal amount) {
-        UserBalance userBalance = getUserBalanceWithLockOrCreateDefault(userId);
+        UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId);
 
         BigDecimal totalIncome = userBalance.getTotalIncome();
         BigDecimal totalExpense = userBalance.getTotalExpense();
@@ -263,7 +255,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     @Transactional
     public void updateBalanceAfterTransactionUpdate(
             UUID userId, TransactionType type, BigDecimal oldAmount, BigDecimal newAmount) {
-        UserBalance userBalance = getUserBalanceWithLockOrCreateDefault(userId);
+        UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId);
 
         BigDecimal totalIncome = userBalance.getTotalIncome();
         BigDecimal totalExpense = userBalance.getTotalExpense();
@@ -295,7 +287,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     @Override
     @Transactional
     public void moveToSavings(UUID userId, BigDecimal amount) {
-        UserBalance userBalance = getUserBalanceWithLockOrCreateDefault(userId);
+        UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId);
 
         BigDecimal newAccountBalance = userBalance.getAccountBalance().subtract(amount);
         BigDecimal newSavingsBalance = userBalance.getSavingsBalance().add(amount);
@@ -315,7 +307,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     @Override
     @Transactional
     public void updateSavingsBalance(UUID userId, BigDecimal oldAmount, BigDecimal newAmount) {
-        UserBalance userBalance = getUserBalanceWithLockOrCreateDefault(userId);
+        UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId);
 
         BigDecimal difference = newAmount.subtract(oldAmount);
         BigDecimal newAccountBalance = userBalance.getAccountBalance().subtract(difference);
@@ -336,7 +328,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     @Override
     @Transactional
     public void moveFromSavings(UUID userId, BigDecimal amount) {
-        UserBalance userBalance = getUserBalanceWithLockOrCreateDefault(userId);
+        UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId);
 
         BigDecimal newAccountBalance = userBalance.getAccountBalance().add(amount);
         BigDecimal newSavingsBalance = userBalance.getSavingsBalance().subtract(amount);

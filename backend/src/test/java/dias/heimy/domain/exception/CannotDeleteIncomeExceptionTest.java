@@ -31,12 +31,12 @@ class CannotDeleteIncomeExceptionTest {
     }
 
     @Test
-    @DisplayName("Should be instance of DomainException")
-    void shouldBeInstanceOfDomainException() {
+    @DisplayName("Should be instance of BusinessException")
+    void shouldBeInstanceOfBusinessException() {
 
         var exception = new CannotDeleteIncomeException();
 
-        assertThat(exception).isInstanceOf(DomainException.class);
+        assertThat(exception).isInstanceOf(BusinessException.class);
     }
 
     @Test

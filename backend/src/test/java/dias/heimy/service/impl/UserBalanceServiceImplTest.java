@@ -16,6 +16,7 @@ import dias.heimy.domain.exception.UserNotFoundException;
 import dias.heimy.repository.TransactionRepository;
 import dias.heimy.repository.UserBalanceRepository;
 import dias.heimy.repository.UserRepository;
+import dias.heimy.service.UserBalanceLockService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,6 +45,9 @@ class UserBalanceServiceImplTest {
     @Mock
     private JwtTokenProvider jwtTokenProvider;
 
+    @Mock
+    private UserBalanceLockService userBalanceLockService;
+
     @InjectMocks
     private UserBalanceServiceImpl userBalanceService;
 
@@ -71,17 +75,19 @@ class UserBalanceServiceImplTest {
     void shouldCreateDefaultBalance_WhenNoBalanceExists() {
 
         var user = createTestUser();
-        var defaultBalance = createDefaultBalance(user);
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceRepository.findByUserId(user.getId())).thenReturn(Optional.of(defaultBalance));
+        when(userBalanceRepository.findByUserId(user.getId())).thenReturn(Optional.empty());
 
         var result = userBalanceService.getCurrentBalance("Bearer token");
 
         assertThat(result).isNotNull();
         assertThat(result.totalIncome()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.totalExpense()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.accountBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.savingsBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.totalBalance()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     @Test
@@ -96,11 +102,9 @@ class UserBalanceServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        user, TransactionType.INCOME, startDate, endDate))
+        when(transactionRepository.sumByUserAndTypeAndDateBetween(user, TransactionType.INCOME, startDate, endDate))
                 .thenReturn(new BigDecimal("3000.00"));
-        when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        user, TransactionType.EXPENSE, startDate, endDate))
+        when(transactionRepository.sumByUserAndTypeAndDateBetween(user, TransactionType.EXPENSE, startDate, endDate))
                 .thenReturn(new BigDecimal("1500.00"));
         when(transactionRepository.sumSavingsDepositsByUserAndDateBetween(user, startDate, endDate))
                 .thenReturn(new BigDecimal("500.00"));
@@ -148,7 +152,8 @@ class UserBalanceServiceImplTest {
         userBalance.setSavingsBalance(new BigDecimal("500.00"));
         userBalance.setTotalBalance(new BigDecimal("1500.00"));
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.moveToSavings(userId, amount);
@@ -169,7 +174,8 @@ class UserBalanceServiceImplTest {
         userBalance.setSavingsBalance(new BigDecimal("1000.00"));
         userBalance.setTotalBalance(new BigDecimal("1500.00"));
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.moveFromSavings(userId, amount);
@@ -214,7 +220,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.updateBalanceAfterTransaction(userId, TransactionType.INCOME, amount);
@@ -235,7 +242,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("2500.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.revertBalanceAfterTransactionDelete(userId, TransactionType.EXPENSE, amount);
@@ -257,7 +265,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.updateBalanceAfterTransactionUpdate(userId, TransactionType.INCOME, oldAmount, newAmount);
@@ -279,7 +288,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("2500.00"));
         userBalance.setSavingsBalance(new BigDecimal("500.00"));
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.updateSavingsBalance(userId, oldAmount, newAmount);
@@ -301,11 +311,9 @@ class UserBalanceServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        user, TransactionType.INCOME, startDate, endDate))
+        when(transactionRepository.sumByUserAndTypeAndDateBetween(user, TransactionType.INCOME, startDate, endDate))
                 .thenReturn(null);
-        when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        user, TransactionType.EXPENSE, startDate, endDate))
+        when(transactionRepository.sumByUserAndTypeAndDateBetween(user, TransactionType.EXPENSE, startDate, endDate))
                 .thenReturn(null);
         when(transactionRepository.sumSavingsDepositsByUserAndDateBetween(user, startDate, endDate))
                 .thenReturn(BigDecimal.ZERO);
@@ -364,7 +372,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.updateBalanceAfterTransaction(userId, TransactionType.TRANSFER, amount);
@@ -386,7 +395,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.updateBalanceAfterTransaction(userId, TransactionType.EXPENSE, amount);
@@ -407,7 +417,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.revertBalanceAfterTransactionDelete(userId, TransactionType.INCOME, amount);
@@ -429,7 +440,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.updateBalanceAfterTransactionUpdate(userId, TransactionType.EXPENSE, oldAmount, newAmount);
@@ -450,7 +462,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.revertBalanceAfterTransactionDelete(userId, TransactionType.TRANSFER, amount);
@@ -473,7 +486,8 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(BigDecimal.ZERO);
 
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(userBalance));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(userId))
+                .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
 
         userBalanceService.updateBalanceAfterTransactionUpdate(userId, TransactionType.TRANSFER, oldAmount, newAmount);
@@ -481,51 +495,6 @@ class UserBalanceServiceImplTest {
         verify(userBalanceRepository).save(userBalance);
         assertThat(userBalance.getTotalIncome()).isEqualByComparingTo(new BigDecimal("5000.00"));
         assertThat(userBalance.getTotalExpense()).isEqualByComparingTo(new BigDecimal("2000.00"));
-    }
-
-    @Test
-    @DisplayName("Should create default balance when user balance not found with lock")
-    void shouldCreateDefaultBalance_WhenUserBalanceNotFoundWithLock() {
-
-        var userId = UUID.randomUUID();
-        var user = createTestUser();
-        user.setId(userId);
-        var newBalance = createDefaultBalance(user);
-
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.empty());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(newBalance);
-
-        var result = userBalanceService.getUserBalanceWithLockOrCreateDefault(userId);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getTotalIncome()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(result.getTotalExpense()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(result.getAccountBalance()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(result.getSavingsBalance()).isEqualByComparingTo(BigDecimal.ZERO);
-        verify(userRepository).findById(userId);
-        verify(userBalanceRepository).save(any(UserBalance.class));
-    }
-
-    @Test
-    @DisplayName("Should return existing balance when found with lock")
-    void shouldReturnExistingBalance_WhenFoundWithLock() {
-
-        var userId = UUID.randomUUID();
-        var existingBalance = new UserBalance();
-        existingBalance.setId(UUID.randomUUID());
-        existingBalance.setTotalIncome(new BigDecimal("1000.00"));
-        existingBalance.setTotalExpense(new BigDecimal("500.00"));
-        existingBalance.setAccountBalance(new BigDecimal("500.00"));
-        existingBalance.setSavingsBalance(BigDecimal.ZERO);
-
-        when(userBalanceRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(existingBalance));
-
-        var result = userBalanceService.getUserBalanceWithLockOrCreateDefault(userId);
-
-        assertThat(result).isEqualTo(existingBalance);
-        assertThat(result.getTotalIncome()).isEqualByComparingTo(new BigDecimal("1000.00"));
-        verify(userBalanceRepository).findByUserIdWithLock(userId);
     }
 
     private User createTestUser() {
@@ -551,20 +520,6 @@ class UserBalanceServiceImplTest {
         userBalance.setAccountBalance(new BigDecimal("3000.00"));
         userBalance.setSavingsBalance(new BigDecimal("500.00"));
         userBalance.setTotalBalance(new BigDecimal("3500.00"));
-        userBalance.setCreatedAt(LocalDateTime.now());
-        userBalance.setUpdatedAt(LocalDateTime.now());
-        return userBalance;
-    }
-
-    private UserBalance createDefaultBalance(User user) {
-        UserBalance userBalance = new UserBalance();
-        userBalance.setId(UUID.randomUUID());
-        userBalance.setUser(user);
-        userBalance.setTotalIncome(BigDecimal.ZERO);
-        userBalance.setTotalExpense(BigDecimal.ZERO);
-        userBalance.setAccountBalance(BigDecimal.ZERO);
-        userBalance.setSavingsBalance(BigDecimal.ZERO);
-        userBalance.setTotalBalance(BigDecimal.ZERO);
         userBalance.setCreatedAt(LocalDateTime.now());
         userBalance.setUpdatedAt(LocalDateTime.now());
         return userBalance;

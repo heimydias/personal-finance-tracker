@@ -5,7 +5,7 @@ import static dias.heimy.domain.enums.ErrorCode.SAVINGS_NOT_FOUND;
 import java.io.Serial;
 import java.util.UUID;
 
-public class SavingsNotFoundException extends DomainException {
+public class SavingsNotFoundException extends BusinessException {
 
     private static final String MESSAGE_TEMPLATE = "Poupança não encontrada: %s";
 

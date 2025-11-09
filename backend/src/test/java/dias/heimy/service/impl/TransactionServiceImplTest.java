@@ -12,14 +12,15 @@ import dias.heimy.domain.entity.User;
 import dias.heimy.domain.entity.UserBalance;
 import dias.heimy.domain.enums.TransactionType;
 import dias.heimy.domain.enums.UserRole;
+import dias.heimy.domain.exception.BusinessException;
 import dias.heimy.domain.exception.CannotDeleteIncomeException;
-import dias.heimy.domain.exception.DomainException;
 import dias.heimy.domain.exception.InsufficientBalanceException;
 import dias.heimy.dto.mapper.TransactionMapper;
 import dias.heimy.dto.request.TransactionRequest;
 import dias.heimy.dto.response.TransactionResponse;
 import dias.heimy.repository.TransactionRepository;
 import dias.heimy.repository.UserRepository;
+import dias.heimy.service.UserBalanceLockService;
 import dias.heimy.service.UserBalanceService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -62,6 +63,9 @@ class TransactionServiceImplTest {
     @Mock
     private UserBalanceService userBalanceService;
 
+    @Mock
+    private UserBalanceLockService userBalanceLockService;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -79,7 +83,7 @@ class TransactionServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
         when(transactionMapper.toEntity(request)).thenReturn(transaction);
         when(transactionRepository.save(any(Transaction.class))).thenReturn(savedTransaction);
@@ -96,7 +100,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when user not found")
+    @DisplayName("Should throw BusinessException when user not found")
     void shouldThrowException_WhenUserNotFound() {
 
         var request = new TransactionRequest(
@@ -106,7 +110,7 @@ class TransactionServiceImplTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> transactionService.createTransaction(request, "Bearer token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Usuário não encontrado");
 
         verify(jwtTokenProvider).extractEmailFromToken("token");
@@ -136,7 +140,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when transaction not found")
+    @DisplayName("Should throw BusinessException when transaction not found")
     void shouldThrowException_WhenTransactionNotFound() {
 
         var transactionId = UUID.randomUUID();
@@ -147,14 +151,14 @@ class TransactionServiceImplTest {
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> transactionService.getTransactionById(transactionId, "Bearer token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Transação não encontrada");
 
         verify(transactionRepository).findById(transactionId);
     }
 
     @Test
-    @DisplayName("Should throw DomainException when user tries to access transaction of another user")
+    @DisplayName("Should throw BusinessException when user tries to access transaction of another user")
     void shouldThrowException_WhenUserTriesToAccessOtherUserTransaction() {
 
         var transactionId = UUID.randomUUID();
@@ -170,7 +174,7 @@ class TransactionServiceImplTest {
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
 
         assertThatThrownBy(() -> transactionService.getTransactionById(transactionId, "Bearer token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Você não tem permissão para acessar esta transação");
 
         verify(transactionRepository).findById(transactionId);
@@ -225,7 +229,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when trying to update transaction of another user")
+    @DisplayName("Should throw BusinessException when trying to update transaction of another user")
     void shouldThrowException_WhenUpdatingOtherUserTransaction() {
 
         var transactionId = UUID.randomUUID();
@@ -243,7 +247,7 @@ class TransactionServiceImplTest {
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
 
         assertThatThrownBy(() -> transactionService.updateTransaction(transactionId, request, "Bearer token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Você não tem permissão para acessar esta transação");
 
         verify(transactionRepository).findById(transactionId);
@@ -269,7 +273,7 @@ class TransactionServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
 
         transactionService.deleteTransaction(transactionId, "Bearer token");
@@ -279,7 +283,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when trying to delete transaction of another user")
+    @DisplayName("Should throw BusinessException when trying to delete transaction of another user")
     void shouldThrowException_WhenDeletingOtherUserTransaction() {
 
         var transactionId = UUID.randomUUID();
@@ -295,7 +299,7 @@ class TransactionServiceImplTest {
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
 
         assertThatThrownBy(() -> transactionService.deleteTransaction(transactionId, "Bearer token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Você não tem permissão para acessar esta transação");
 
         verify(transactionRepository).findById(transactionId);
@@ -315,8 +319,9 @@ class TransactionServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
+        when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
         when(transactionMapper.toEntity(request)).thenReturn(transaction);
         when(transactionRepository.save(any(Transaction.class))).thenReturn(savedTransaction);
         when(transactionMapper.toResponse(savedTransaction)).thenReturn(expectedResponse);
@@ -325,6 +330,7 @@ class TransactionServiceImplTest {
 
         assertThat(result).isEqualTo(expectedResponse);
         assertThat(result.type()).isEqualTo(TransactionType.EXPENSE);
+        verify(userBalanceRepository).save(userBalance);
     }
 
     @Test
@@ -338,7 +344,7 @@ class TransactionServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
 
         assertThatThrownBy(() -> transactionService.createTransaction(request, "Bearer token"))
@@ -398,7 +404,7 @@ class TransactionServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
 
         assertThatThrownBy(() -> transactionService.deleteTransaction(transactionId, "Bearer token"))
@@ -438,7 +444,7 @@ class TransactionServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
         when(transactionMapper.toEntity(request)).thenReturn(transaction);
@@ -469,7 +475,7 @@ class TransactionServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
         when(transactionMapper.toEntity(request)).thenReturn(transaction);
@@ -502,7 +508,7 @@ class TransactionServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
         when(transactionMapper.toEntity(request)).thenReturn(transaction);
@@ -529,6 +535,7 @@ class TransactionServiceImplTest {
         var userBalance = createTestUserBalance(user, new BigDecimal("1000.00"));
         userBalance.setTotalIncome(new BigDecimal("2000.00"));
         userBalance.setTotalExpense(new BigDecimal("500.00"));
+        userBalance.setAccountBalance(new BigDecimal("1000.00"));
         userBalance.setSavingsBalance(new BigDecimal("500.00"));
 
         var transaction = createTestTransaction(user, TransactionType.EXPENSE);
@@ -539,7 +546,7 @@ class TransactionServiceImplTest {
 
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
                 .thenReturn(userBalance);
         when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
         when(transactionMapper.toEntity(request)).thenReturn(transaction);
@@ -552,6 +559,47 @@ class TransactionServiceImplTest {
         verify(userBalanceRepository).save(userBalance);
         assertThat(userBalance.getTotalExpense()).isEqualByComparingTo(new BigDecimal("650.00"));
         assertThat(userBalance.getAccountBalance()).isEqualByComparingTo(new BigDecimal("850.00"));
+    }
+
+    @Test
+    @DisplayName("Should create TRANSFER transaction without updating income or expense totals")
+    void shouldCreateTransferTransaction_WithoutUpdatingTotals() {
+
+        var request = new TransactionRequest(
+                TransactionType.TRANSFER,
+                "Transferência",
+                new BigDecimal("100.00"),
+                LocalDate.now(),
+                "Transfer to savings");
+        var user = createTestUser();
+        var userBalance = createTestUserBalance(user, new BigDecimal("1000.00"));
+        userBalance.setTotalIncome(new BigDecimal("2000.00"));
+        userBalance.setTotalExpense(new BigDecimal("500.00"));
+        userBalance.setAccountBalance(new BigDecimal("1000.00"));
+        userBalance.setSavingsBalance(new BigDecimal("500.00"));
+
+        var transaction = createTestTransaction(user, TransactionType.TRANSFER);
+        transaction.setAmount(new BigDecimal("100.00"));
+        var savedTransaction = createTestTransaction(user, TransactionType.TRANSFER);
+        savedTransaction.setAmount(new BigDecimal("100.00"));
+        var expectedResponse = createTransactionResponse(TransactionType.TRANSFER);
+
+        when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId()))
+                .thenReturn(userBalance);
+        when(userBalanceRepository.save(any(UserBalance.class))).thenReturn(userBalance);
+        when(transactionMapper.toEntity(request)).thenReturn(transaction);
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(savedTransaction);
+        when(transactionMapper.toResponse(savedTransaction)).thenReturn(expectedResponse);
+
+        var result = transactionService.createTransaction(request, "Bearer token");
+
+        assertThat(result).isEqualTo(expectedResponse);
+        verify(userBalanceRepository).save(userBalance);
+        // TRANSFER should not change totalIncome or totalExpense
+        assertThat(userBalance.getTotalIncome()).isEqualByComparingTo(new BigDecimal("2000.00"));
+        assertThat(userBalance.getTotalExpense()).isEqualByComparingTo(new BigDecimal("500.00"));
     }
 
     private User createTestUser() {

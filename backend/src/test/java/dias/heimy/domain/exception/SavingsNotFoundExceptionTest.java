@@ -31,13 +31,13 @@ class SavingsNotFoundExceptionTest {
     }
 
     @Test
-    @DisplayName("Should be instance of DomainException")
-    void shouldBeInstanceOfDomainException() {
+    @DisplayName("Should be instance of BusinessException")
+    void shouldBeInstanceOfBusinessException() {
 
         var savingsId = UUID.randomUUID();
         var exception = new SavingsNotFoundException(savingsId);
 
-        assertThat(exception).isInstanceOf(DomainException.class);
+        assertThat(exception).isInstanceOf(BusinessException.class);
     }
 
     @Test

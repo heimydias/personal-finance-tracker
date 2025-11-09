@@ -18,6 +18,7 @@ import dias.heimy.repository.TransactionRepository;
 import dias.heimy.repository.UserBalanceRepository;
 import dias.heimy.repository.UserRepository;
 import dias.heimy.service.TransactionService;
+import dias.heimy.service.UserBalanceLockService;
 import dias.heimy.service.UserBalanceService;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -39,6 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserBalanceService userBalanceService;
+    private final UserBalanceLockService userBalanceLockService;
 
     @Override
     @Transactional
@@ -46,7 +48,7 @@ public class TransactionServiceImpl implements TransactionService {
         String email = extractEmailFromToken(authorizationHeader);
         User user = findUserByEmail(email);
 
-        UserBalance userBalance = userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId());
+        UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId());
 
         if (request.type() == TransactionType.EXPENSE) {
             BigDecimal balanceAfterExpense = userBalance.getAccountBalance().subtract(request.amount());
@@ -166,7 +168,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionType type = transaction.getType();
 
         if (type == TransactionType.INCOME) {
-            UserBalance userBalance = userBalanceService.getUserBalanceWithLockOrCreateDefault(user.getId());
+            UserBalance userBalance = userBalanceLockService.getUserBalanceWithLockOrCreateDefault(user.getId());
 
             BigDecimal newTotalIncome = userBalance.getTotalIncome().subtract(amount);
             BigDecimal newAccountBalance =

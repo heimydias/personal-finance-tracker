@@ -4,7 +4,7 @@ import static dias.heimy.domain.enums.ErrorCode.INSUFFICIENT_BALANCE;
 
 import java.io.Serial;
 
-public class InsufficientBalanceException extends DomainException {
+public class InsufficientBalanceException extends BusinessException {
 
     private static final String MESSAGE = "Saldo insuficiente";
 

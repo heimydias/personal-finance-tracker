@@ -10,7 +10,7 @@ import static dias.heimy.domain.enums.UserRole.ADMIN;
 import dias.heimy.config.security.JwtTokenProvider;
 import dias.heimy.domain.entity.User;
 import dias.heimy.domain.enums.UserRole;
-import dias.heimy.domain.exception.DomainException;
+import dias.heimy.domain.exception.BusinessException;
 import dias.heimy.domain.exception.UserAlreadyExistsException;
 import dias.heimy.domain.exception.UserNotFoundException;
 import dias.heimy.dto.mapper.UserMapper;
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
 
         if (request.email() != null && !request.email().equals(existingUser.getEmail())) {
             if (userRepository.existsByEmail(request.email())) {
-                throw new DomainException(USER_ALREADY_EXISTS, "Email já existe: " + request.email());
+                throw new BusinessException(USER_ALREADY_EXISTS, "Email já existe: " + request.email());
             }
             existingUser.setEmail(request.email());
         }
@@ -105,11 +105,11 @@ public class UserServiceImpl implements UserService {
 
         if (request.role() != null && request.role() != existingUser.getRole()) {
             if (Boolean.TRUE.equals(existingUser.getIsSystemAdmin())) {
-                throw new DomainException(
+                throw new BusinessException(
                         OPERATION_NOT_PERMITTED, "O perfil do administrador padrão do sistema não pode ser alterado");
             }
             if (!jwtValidationUtil.isAdminAuthenticated(authorizationHeader)) {
-                throw new DomainException(
+                throw new BusinessException(
                         ADMIN_AUTH_INSUFFICIENT, "Apenas administradores podem alterar roles de usuários");
             }
             existingUser.setRole(request.role());
@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
                 userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MESSAGE + id));
 
         if (Boolean.TRUE.equals(existingUser.getIsSystemAdmin())) {
-            throw new DomainException(
+            throw new BusinessException(
                     OPERATION_NOT_PERMITTED, "O administrador padrão do sistema não pode ser deletado");
         }
 
@@ -143,7 +143,7 @@ public class UserServiceImpl implements UserService {
         if (!jwtValidationUtil.isAdminAuthenticated(authorizationHeader)) {
             String tokenEmail = extractEmailFromToken(authorizationHeader);
             if (!user.getEmail().equals(tokenEmail)) {
-                throw new DomainException(ADMIN_AUTH_INSUFFICIENT, "Usuários só podem acessar seus próprios dados");
+                throw new BusinessException(ADMIN_AUTH_INSUFFICIENT, "Usuários só podem acessar seus próprios dados");
             }
         }
     }
@@ -154,11 +154,11 @@ public class UserServiceImpl implements UserService {
         if (!isAdmin) {
             String tokenEmail = extractEmailFromToken(authorizationHeader);
             if (!user.getEmail().equals(tokenEmail)) {
-                throw new DomainException(ADMIN_AUTH_INSUFFICIENT, "Usuários só podem atualizar seus próprios dados");
+                throw new BusinessException(ADMIN_AUTH_INSUFFICIENT, "Usuários só podem atualizar seus próprios dados");
             }
 
             if (request.role() != null && request.role() != user.getRole()) {
-                throw new DomainException(
+                throw new BusinessException(
                         ADMIN_AUTH_INSUFFICIENT, "Apenas administradores podem alterar roles de usuários");
             }
         }
@@ -172,13 +172,13 @@ public class UserServiceImpl implements UserService {
         if (role == ADMIN) {
             if (authorizationHeader == null || authorizationHeader.trim().isEmpty()) {
                 log.warn("Tentativa de criar usuário ADMIN sem token de autorização");
-                throw new DomainException(
+                throw new BusinessException(
                         ADMIN_AUTH_REQUIRED, "Apenas administradores logados podem criar usuários ADMIN");
             }
 
             if (!jwtValidationUtil.isAdminAuthenticated(authorizationHeader)) {
                 log.warn("Tentativa de criar usuário ADMIN com token inválido");
-                throw new DomainException(
+                throw new BusinessException(
                         ADMIN_AUTH_INSUFFICIENT, "Apenas administradores podem criar outros administradores");
             }
         }
@@ -188,7 +188,7 @@ public class UserServiceImpl implements UserService {
 
     private String extractEmailFromToken(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new DomainException(INVALID_TOKEN, "Token de autorização inválido");
+            throw new BusinessException(INVALID_TOKEN, "Token de autorização inválido");
         }
 
         String token = authorizationHeader.substring(7);

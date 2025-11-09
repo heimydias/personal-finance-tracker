@@ -4,7 +4,7 @@ import static dias.heimy.domain.enums.ErrorCode.USER_NOT_FOUND;
 
 import java.io.Serial;
 
-public class UserNotFoundException extends DomainException {
+public class UserNotFoundException extends BusinessException {
 
     private static final String MESSAGE_TEMPLATE = "Usuário não encontrado: %s";
 

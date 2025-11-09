@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import dias.heimy.config.security.JwtTokenProvider;
 import dias.heimy.domain.entity.User;
 import dias.heimy.domain.enums.UserRole;
-import dias.heimy.domain.exception.DomainException;
+import dias.heimy.domain.exception.BusinessException;
 import dias.heimy.domain.exception.UserAlreadyExistsException;
 import dias.heimy.domain.exception.UserNotFoundException;
 import dias.heimy.dto.mapper.UserMapper;
@@ -94,14 +94,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when creating ADMIN without authorization")
+    @DisplayName("Should throw BusinessException when creating ADMIN without authorization")
     void shouldThrowException_WhenCreatingAdminWithoutAuth() {
 
         var request = new UserRegisterRequest("Admin User", "admin@example.com", "password123", UserRole.ADMIN);
         when(userRepository.existsByEmail(request.email())).thenReturn(false);
 
         assertThatThrownBy(() -> userService.createUser(request, null))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Apenas administradores logados podem criar usuários ADMIN");
 
         verify(userRepository).existsByEmail(request.email());
@@ -109,14 +109,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when creating ADMIN with empty authorization header")
+    @DisplayName("Should throw BusinessException when creating ADMIN with empty authorization header")
     void shouldThrowException_WhenCreatingAdminWithEmptyAuthorizationHeader() {
 
         var request = new UserRegisterRequest("Admin User", "admin@example.com", "password123", UserRole.ADMIN);
         when(userRepository.existsByEmail(request.email())).thenReturn(false);
 
         assertThatThrownBy(() -> userService.createUser(request, "   "))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Apenas administradores logados podem criar usuários ADMIN");
 
         verify(userRepository).existsByEmail(request.email());
@@ -204,7 +204,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when user tries to access other user data")
+    @DisplayName("Should throw BusinessException when user tries to access other user data")
     void shouldThrowException_WhenUserTriesToAccessOtherUserData() {
 
         var userId = UUID.randomUUID();
@@ -217,7 +217,7 @@ class UserServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("other@example.com");
 
         assertThatThrownBy(() -> userService.getUserById(userId, "Bearer user_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Usuários só podem acessar seus próprios dados");
 
         verify(userRepository).findById(userId);
@@ -252,7 +252,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when user tries to change role")
+    @DisplayName("Should throw BusinessException when user tries to change role")
     void shouldThrowException_WhenUserTriesToChangeRole() {
 
         var userId = UUID.randomUUID();
@@ -267,7 +267,7 @@ class UserServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("user@example.com");
 
         assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer user_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Apenas administradores podem alterar roles de usuários");
 
         verify(userRepository).findById(userId);
@@ -295,7 +295,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when trying to delete system admin")
+    @DisplayName("Should throw BusinessException when trying to delete system admin")
     void shouldThrowException_WhenDeletingSystemAdmin() {
 
         var userId = UUID.randomUUID();
@@ -307,7 +307,7 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(systemAdmin));
 
         assertThatThrownBy(() -> userService.deleteUser(userId, "Bearer admin_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("O administrador padrão do sistema não pode ser deletado");
 
         verify(userRepository).findById(userId);
@@ -315,7 +315,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when trying to change system admin role")
+    @DisplayName("Should throw BusinessException when trying to change system admin role")
     void shouldThrowException_WhenChangingSystemAdminRole() {
 
         var userId = UUID.randomUUID();
@@ -329,7 +329,7 @@ class UserServiceImplTest {
         when(jwtValidationUtil.isAdminAuthenticated("Bearer admin_token")).thenReturn(true);
 
         assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer admin_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("O perfil do administrador padrão do sistema não pode ser alterado");
 
         verify(userRepository).findById(userId);
@@ -359,7 +359,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when trying to create ADMIN with invalid token")
+    @DisplayName("Should throw BusinessException when trying to create ADMIN with invalid token")
     void shouldThrowException_WhenCreatingAdminWithInvalidToken() {
 
         var request = new UserRegisterRequest("Admin User", "admin@example.com", "password123", UserRole.ADMIN);
@@ -367,7 +367,7 @@ class UserServiceImplTest {
         when(jwtValidationUtil.isAdminAuthenticated("Bearer invalid_token")).thenReturn(false);
 
         assertThatThrownBy(() -> userService.createUser(request, "Bearer invalid_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Apenas administradores podem criar outros administradores");
 
         verify(userRepository).existsByEmail(request.email());
@@ -533,7 +533,7 @@ class UserServiceImplTest {
                 .thenReturn(false);
 
         assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer admin_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Apenas administradores podem alterar roles de usuários");
 
         verify(jwtValidationUtil, org.mockito.Mockito.times(2)).isAdminAuthenticated("Bearer admin_token");
@@ -585,7 +585,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when updating to existing email")
+    @DisplayName("Should throw BusinessException when updating to existing email")
     void shouldThrowException_WhenUpdatingToExistingEmail() {
 
         var userId = UUID.randomUUID();
@@ -600,14 +600,14 @@ class UserServiceImplTest {
         when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer user_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Email já existe: existing@example.com");
 
         verify(userRepository).existsByEmail("existing@example.com");
     }
 
     @Test
-    @DisplayName("Should throw DomainException when invalid token format")
+    @DisplayName("Should throw BusinessException when invalid token format")
     void shouldThrowException_WhenInvalidTokenFormat() {
 
         var userId = UUID.randomUUID();
@@ -618,14 +618,14 @@ class UserServiceImplTest {
         when(jwtValidationUtil.isAdminAuthenticated("invalid_token")).thenReturn(false);
 
         assertThatThrownBy(() -> userService.getUserById(userId, "invalid_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Token de autorização inválido");
 
         verify(userRepository).findById(userId);
     }
 
     @Test
-    @DisplayName("Should throw DomainException when non-admin tries to update other user data")
+    @DisplayName("Should throw BusinessException when non-admin tries to update other user data")
     void shouldThrowException_WhenNonAdminTriesToUpdateOtherUserData() {
 
         var userId = UUID.randomUUID();
@@ -639,7 +639,7 @@ class UserServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("user_token")).thenReturn("other@example.com");
 
         assertThatThrownBy(() -> userService.updateUser(userId, request, "Bearer user_token"))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Usuários só podem atualizar seus próprios dados");
 
         verify(userRepository).findById(userId);
@@ -648,7 +648,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw DomainException when authorization header is null")
+    @DisplayName("Should throw BusinessException when authorization header is null")
     void shouldThrowException_WhenAuthorizationHeaderIsNull() {
 
         var userId = UUID.randomUUID();
@@ -659,7 +659,7 @@ class UserServiceImplTest {
         when(jwtValidationUtil.isAdminAuthenticated(null)).thenReturn(false);
 
         assertThatThrownBy(() -> userService.getUserById(userId, null))
-                .isInstanceOf(DomainException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Token de autorização inválido");
 
         verify(userRepository).findById(userId);

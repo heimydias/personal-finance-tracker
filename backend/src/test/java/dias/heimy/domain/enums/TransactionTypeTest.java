@@ -50,8 +50,6 @@ class TransactionTypeTest {
     @DisplayName("Should verify enum constants")
     void shouldVerifyEnumConstants() {
 
-        assertThat(TransactionType.values())
-                .doesNotContainNull()
-                .doesNotHaveDuplicates();
+        assertThat(TransactionType.values()).doesNotContainNull().doesNotHaveDuplicates();
     }
 }

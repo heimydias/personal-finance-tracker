@@ -5,7 +5,7 @@ import static dias.heimy.domain.enums.ErrorCode.TRANSACTION_NOT_FOUND;
 import java.io.Serial;
 import java.util.UUID;
 
-public class TransactionNotFoundException extends DomainException {
+public class TransactionNotFoundException extends BusinessException {
 
     private static final String MESSAGE_TEMPLATE = "Transação não encontrada: %s";
 

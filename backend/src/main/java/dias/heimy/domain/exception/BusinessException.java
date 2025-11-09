@@ -1,28 +1,37 @@
 package dias.heimy.domain.exception;
 
+import dias.heimy.domain.enums.ErrorCode;
 import java.io.Serial;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-public abstract class BusinessException extends RuntimeException {
+@Getter
+public class BusinessException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 6098402741363463495L;
 
-    protected BusinessException(String message) {
+    private final ErrorCode errorCode;
+
+    public BusinessException(ErrorCode errorCode, String message) {
         super(message);
+        this.errorCode = errorCode;
     }
 
-    protected BusinessException(String message, Throwable cause) {
+    public BusinessException(ErrorCode errorCode, String message, Throwable cause) {
         super(message, cause);
+        this.errorCode = errorCode;
     }
 
-    public abstract String getErrorCode();
+    public String getErrorCode() {
+        return errorCode.getCode();
+    }
 
     public int getHttpStatusCode() {
-        return HttpStatus.BAD_REQUEST.value();
+        return errorCode.getHttpStatusCode();
     }
 
     public HttpStatus getHttpStatus() {
-        return HttpStatus.valueOf(getHttpStatusCode());
+        return errorCode.getHttpStatus();
     }
 }
