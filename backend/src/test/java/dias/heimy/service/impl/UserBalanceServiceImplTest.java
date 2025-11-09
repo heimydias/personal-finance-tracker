@@ -97,10 +97,10 @@ class UserBalanceServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        eq(user), eq(TransactionType.INCOME), eq(startDate), eq(endDate)))
+                        user, TransactionType.INCOME, startDate, endDate))
                 .thenReturn(new BigDecimal("3000.00"));
         when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        eq(user), eq(TransactionType.EXPENSE), eq(startDate), eq(endDate)))
+                        user, TransactionType.EXPENSE, startDate, endDate))
                 .thenReturn(new BigDecimal("1500.00"));
         when(transactionRepository.sumSavingsDepositsByUserAndDateBetween(user, startDate, endDate))
                 .thenReturn(new BigDecimal("500.00"));
@@ -302,10 +302,10 @@ class UserBalanceServiceImplTest {
         when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        eq(user), eq(TransactionType.INCOME), eq(startDate), eq(endDate)))
+                        user, TransactionType.INCOME, startDate, endDate))
                 .thenReturn(null);
         when(transactionRepository.sumByUserAndTypeAndDateBetween(
-                        eq(user), eq(TransactionType.EXPENSE), eq(startDate), eq(endDate)))
+                        user, TransactionType.EXPENSE, startDate, endDate))
                 .thenReturn(null);
         when(transactionRepository.sumSavingsDepositsByUserAndDateBetween(user, startDate, endDate))
                 .thenReturn(BigDecimal.ZERO);

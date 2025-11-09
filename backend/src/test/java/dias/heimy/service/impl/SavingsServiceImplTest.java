@@ -323,7 +323,7 @@ class SavingsServiceImplTest {
 
         var result = savingsService.calculateConsolidatedYield("Bearer token");
 
-        assertThat(result.totalSavings()).isEqualTo(0);
+        assertThat(result.totalSavings()).isZero();
         assertThat(result.totalAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.totalMonthlyYield()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.averageInterestRate()).isEqualByComparingTo(BigDecimal.ZERO);
