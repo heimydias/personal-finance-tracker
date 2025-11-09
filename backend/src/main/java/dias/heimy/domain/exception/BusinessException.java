@@ -1,7 +1,7 @@
 package dias.heimy.domain.exception;
 
-import dias.heimy.domain.enums.ExceptionType;
 import java.io.Serial;
+import org.springframework.http.HttpStatus;
 
 public abstract class BusinessException extends RuntimeException {
 
@@ -19,8 +19,10 @@ public abstract class BusinessException extends RuntimeException {
     public abstract String getErrorCode();
 
     public int getHttpStatusCode() {
-        return 400;
+        return HttpStatus.BAD_REQUEST.value();
     }
 
-    public abstract ExceptionType getType();
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.valueOf(getHttpStatusCode());
+    }
 }

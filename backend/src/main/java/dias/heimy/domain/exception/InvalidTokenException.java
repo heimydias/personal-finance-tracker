@@ -1,8 +1,8 @@
 package dias.heimy.domain.exception;
 
 import dias.heimy.domain.enums.ErrorCode;
-import dias.heimy.domain.enums.ExceptionType;
 import java.io.Serial;
+import org.springframework.http.HttpStatus;
 
 public class InvalidTokenException extends BusinessException {
 
@@ -30,7 +30,7 @@ public class InvalidTokenException extends BusinessException {
     }
 
     @Override
-    public ExceptionType getType() {
-        return ExceptionType.AUTHENTICATION;
+    public HttpStatus getHttpStatus() {
+        return ERROR_CODE.getHttpStatus();
     }
 }

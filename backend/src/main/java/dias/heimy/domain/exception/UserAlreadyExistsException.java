@@ -1,8 +1,8 @@
 package dias.heimy.domain.exception;
 
 import dias.heimy.domain.enums.ErrorCode;
-import dias.heimy.domain.enums.ExceptionType;
 import java.io.Serial;
+import org.springframework.http.HttpStatus;
 
 public class UserAlreadyExistsException extends BusinessException {
 
@@ -26,7 +26,7 @@ public class UserAlreadyExistsException extends BusinessException {
     }
 
     @Override
-    public ExceptionType getType() {
-        return ExceptionType.CONFLICT;
+    public HttpStatus getHttpStatus() {
+        return ERROR_CODE.getHttpStatus();
     }
 }

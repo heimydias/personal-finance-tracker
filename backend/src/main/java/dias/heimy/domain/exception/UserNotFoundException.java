@@ -1,32 +1,17 @@
 package dias.heimy.domain.exception;
 
-import dias.heimy.domain.enums.ErrorCode;
-import dias.heimy.domain.enums.ExceptionType;
+import static dias.heimy.domain.enums.ErrorCode.USER_NOT_FOUND;
+
 import java.io.Serial;
 
-public class UserNotFoundException extends BusinessException {
+public class UserNotFoundException extends DomainException {
+
+    private static final String MESSAGE_TEMPLATE = "Usuário não encontrado: %s";
 
     @Serial
-    private static final long serialVersionUID = -8472956724834578234L;
+    private static final long serialVersionUID = -5141929566138546373L;
 
     public UserNotFoundException(String email) {
-        super("User not found with email: " + email);
-    }
-
-    private static final ErrorCode ERROR_CODE = ErrorCode.USER_NOT_FOUND;
-
-    @Override
-    public String getErrorCode() {
-        return ERROR_CODE.getCode();
-    }
-
-    @Override
-    public int getHttpStatusCode() {
-        return ERROR_CODE.getHttpStatusCode();
-    }
-
-    @Override
-    public ExceptionType getType() {
-        return ExceptionType.NOT_FOUND;
+        super(USER_NOT_FOUND, String.format(MESSAGE_TEMPLATE, email));
     }
 }

@@ -2,14 +2,14 @@ package dias.heimy.config.web;
 
 import static dias.heimy.constants.ExceptionHandlerAdviceConstants.ERROR_CODE_PROPERTY;
 import static dias.heimy.constants.ExceptionHandlerAdviceConstants.TIMESTAMP_PROPERTY;
-import static dias.heimy.domain.enums.ExceptionType.AUTHENTICATION;
-import static dias.heimy.domain.enums.ExceptionType.CONFLICT;
 import static java.lang.String.format;
 import static java.time.LocalTime.now;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ProblemDetail.forStatusAndDetail;
 import static org.springframework.http.ResponseEntity.status;
 
@@ -43,14 +43,13 @@ public class ExceptionHandlerAdvice {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ProblemDetail> handleBusinessException(BusinessException exception) {
-        HttpStatus status = HttpStatus.valueOf(exception.getHttpStatusCode());
+        HttpStatus status = exception.getHttpStatus();
         ProblemDetail problemDetail = forStatusAndDetail(status, exception.getMessage());
         problemDetail.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         problemDetail.setProperty(ERROR_CODE_PROPERTY, exception.getErrorCode());
-        problemDetail.setProperty("exceptionType", exception.getType().name());
+        problemDetail.setProperty("httpStatus", status.name());
 
-        if ((exception.getType() == AUTHENTICATION || exception.getType() == CONFLICT)
-                && exception instanceof DomainException domainEx) {
+        if ((status == UNAUTHORIZED || status == CONFLICT) && exception instanceof DomainException domainEx) {
             problemDetail.setProperty("errorCode", domainEx.getErrorCode());
         }
 
