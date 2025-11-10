@@ -2,9 +2,9 @@ package dias.heimy.domain.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import dias.heimy.domain.enums.ExceptionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 
 @DisplayName("Tests for InvalidTokenException")
 class InvalidTokenExceptionTest {
@@ -20,7 +20,7 @@ class InvalidTokenExceptionTest {
         assertThat(exception.getMessage()).isEqualTo(message);
         assertThat(exception.getErrorCode()).isEqualTo("INVALID_TOKEN");
         assertThat(exception.getHttpStatusCode()).isEqualTo(401);
-        assertThat(exception.getType()).isEqualTo(ExceptionType.AUTHENTICATION);
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -37,7 +37,7 @@ class InvalidTokenExceptionTest {
         assertThat(exception.getCause().getMessage()).isEqualTo("Root cause");
         assertThat(exception.getErrorCode()).isEqualTo("INVALID_TOKEN");
         assertThat(exception.getHttpStatusCode()).isEqualTo(401);
-        assertThat(exception.getType()).isEqualTo(ExceptionType.AUTHENTICATION);
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test

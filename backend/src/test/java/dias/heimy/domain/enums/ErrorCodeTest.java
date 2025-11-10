@@ -136,7 +136,7 @@ class ErrorCodeTest {
         var values = ErrorCode.values();
 
         assertThat(values)
-                .hasSize(11)
+                .hasSize(15)
                 .contains(
                         ErrorCode.USER_ALREADY_EXISTS,
                         ErrorCode.ADMIN_AUTH_REQUIRED,
@@ -147,8 +147,12 @@ class ErrorCodeTest {
                         ErrorCode.TOKEN_EXPIRED,
                         ErrorCode.VALIDATION_ERROR,
                         ErrorCode.OPERATION_NOT_PERMITTED,
+                        ErrorCode.SAVINGS_NOT_FOUND,
+                        ErrorCode.INSUFFICIENT_BALANCE,
                         ErrorCode.TRANSACTION_NOT_FOUND,
-                        ErrorCode.UNAUTHORIZED_ACCESS);
+                        ErrorCode.UNAUTHORIZED_ACCESS,
+                        ErrorCode.TRANSFER_TRANSACTION_NOT_MODIFIABLE,
+                        ErrorCode.CANNOT_DELETE_INCOME);
     }
 
     @Test

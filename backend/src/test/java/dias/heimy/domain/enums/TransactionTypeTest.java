@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Test;
 class TransactionTypeTest {
 
     @Test
-    @DisplayName("Should have INCOME and EXPENSE values")
+    @DisplayName("Should have INCOME, EXPENSE and TRANSFER values")
     void shouldHaveIncomeAndExpenseValues() {
 
         var values = TransactionType.values();
 
-        assertThat(values).hasSize(2).contains(TransactionType.INCOME, TransactionType.EXPENSE);
+        assertThat(values)
+                .hasSize(3)
+                .contains(TransactionType.INCOME, TransactionType.EXPENSE, TransactionType.TRANSFER);
     }
 
     @Test
@@ -36,11 +38,23 @@ class TransactionTypeTest {
     }
 
     @Test
+    @DisplayName("Should get TRANSFER by name")
+    void shouldGetTransferByName() {
+
+        var transactionType = TransactionType.valueOf("TRANSFER");
+
+        assertThat(transactionType).isEqualTo(TransactionType.TRANSFER);
+    }
+
+    @Test
     @DisplayName("Should verify enum constants")
     void shouldVerifyEnumConstants() {
 
         assertThat(TransactionType.INCOME).isNotNull();
         assertThat(TransactionType.EXPENSE).isNotNull();
+        assertThat(TransactionType.TRANSFER).isNotNull();
         assertThat(TransactionType.INCOME).isNotEqualTo(TransactionType.EXPENSE);
+        assertThat(TransactionType.INCOME).isNotEqualTo(TransactionType.TRANSFER);
+        assertThat(TransactionType.EXPENSE).isNotEqualTo(TransactionType.TRANSFER);
     }
 }

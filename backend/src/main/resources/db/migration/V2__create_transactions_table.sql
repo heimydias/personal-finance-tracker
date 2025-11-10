@@ -1,6 +1,6 @@
 CREATE TABLE transactions (
     id BINARY(16) PRIMARY KEY,
-    type ENUM('INCOME', 'EXPENSE') NOT NULL,
+    type ENUM('INCOME', 'EXPENSE','TRANSFER') NOT NULL,
     category VARCHAR(100) NOT NULL,
     amount DECIMAL(15, 2) NOT NULL,
     transaction_date DATE NOT NULL,

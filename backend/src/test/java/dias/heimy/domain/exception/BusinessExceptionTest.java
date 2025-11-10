@@ -2,9 +2,9 @@ package dias.heimy.domain.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import dias.heimy.domain.enums.ExceptionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 
 @DisplayName("Tests for BusinessException")
 class BusinessExceptionTest {
@@ -18,7 +18,7 @@ class BusinessExceptionTest {
         assertThat(exception.getMessage()).isEqualTo("Test message");
         assertThat(exception.getErrorCode()).isEqualTo("CUSTOM_ERROR");
         assertThat(exception.getHttpStatusCode()).isEqualTo(400);
-        assertThat(exception.getType()).isEqualTo(ExceptionType.VALIDATION);
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -76,11 +76,6 @@ class BusinessExceptionTest {
         public String getErrorCode() {
             return "CUSTOM_ERROR";
         }
-
-        @Override
-        public ExceptionType getType() {
-            return ExceptionType.VALIDATION;
-        }
     }
 
     static class CustomBusinessExceptionWithStatus extends BusinessException {
@@ -100,8 +95,8 @@ class BusinessExceptionTest {
         }
 
         @Override
-        public ExceptionType getType() {
-            return ExceptionType.AUTHORIZATION;
+        public HttpStatus getHttpStatus() {
+            return HttpStatus.FORBIDDEN;
         }
     }
 }

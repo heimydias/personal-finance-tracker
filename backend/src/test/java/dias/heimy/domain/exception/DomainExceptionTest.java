@@ -1,12 +1,13 @@
 package dias.heimy.domain.exception;
 
-import static dias.heimy.domain.enums.ExceptionType.AUTHENTICATION;
-import static dias.heimy.domain.enums.ExceptionType.CONFLICT;
-import static dias.heimy.domain.enums.ExceptionType.VALIDATION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import dias.heimy.domain.enums.ErrorCode;
-import dias.heimy.domain.enums.ExceptionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,7 @@ class DomainExceptionTest {
         assertThat(exception.getMessage()).isEqualTo(message);
         assertThat(exception.getErrorCode()).isEqualTo("INVALID_TOKEN");
         assertThat(exception.getHttpStatusCode()).isEqualTo(401);
-        assertThat(exception.getType()).isEqualTo(AUTHENTICATION);
+        assertThat(exception.getHttpStatus()).isEqualTo(UNAUTHORIZED);
     }
 
     @Test
@@ -42,68 +43,66 @@ class DomainExceptionTest {
         assertThat(exception.getCause()).isEqualTo(cause);
         assertThat(exception.getErrorCode()).isEqualTo("VALIDATION_ERROR");
         assertThat(exception.getHttpStatusCode()).isEqualTo(400);
-        assertThat(exception.getType()).isEqualTo(VALIDATION);
+        assertThat(exception.getHttpStatus()).isEqualTo(BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("Should determine correct exception type based on error code")
-    void shouldDetermineCorrectExceptionType() {
+    @DisplayName("Should determine correct http status based on error code")
+    void shouldDetermineCorrectHttpStatus() {
 
         var authException = new DomainException(ErrorCode.INVALID_TOKEN, "Auth error");
-        assertThat(authException.getType()).isEqualTo(AUTHENTICATION);
+        assertThat(authException.getHttpStatus()).isEqualTo(UNAUTHORIZED);
 
         var businessException = new DomainException(ErrorCode.USER_ALREADY_EXISTS, "Business error");
-        assertThat(businessException.getType()).isEqualTo(CONFLICT);
+        assertThat(businessException.getHttpStatus()).isEqualTo(CONFLICT);
 
         var technicalException = new DomainException(ErrorCode.VALIDATION_ERROR, "Technical error");
-        assertThat(technicalException.getType()).isEqualTo(VALIDATION);
+        assertThat(technicalException.getHttpStatus()).isEqualTo(BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("Should determine AUTHORIZATION type for operation not permitted")
-    void shouldDetermineAuthorizationType_ForOperationNotPermitted() {
+    @DisplayName("Should determine FORBIDDEN status for operation not permitted")
+    void shouldDetermineForbiddenStatus_ForOperationNotPermitted() {
 
         var exception = new DomainException(ErrorCode.OPERATION_NOT_PERMITTED, "Operation not permitted");
 
-        assertThat(exception.getType()).isEqualTo(ExceptionType.AUTHORIZATION);
+        assertThat(exception.getHttpStatus()).isEqualTo(FORBIDDEN);
         assertThat(exception.getHttpStatusCode()).isEqualTo(403);
     }
 
     @Test
-    @DisplayName("Should determine AUTHORIZATION type for unauthorized access")
-    void shouldDetermineAuthorizationType_ForUnauthorizedAccess() {
+    @DisplayName("Should determine FORBIDDEN status for unauthorized access")
+    void shouldDetermineForbiddenStatus_ForUnauthorizedAccess() {
 
         var exception = new DomainException(ErrorCode.UNAUTHORIZED_ACCESS, "Unauthorized");
 
-        assertThat(exception.getType()).isEqualTo(ExceptionType.AUTHORIZATION);
+        assertThat(exception.getHttpStatus()).isEqualTo(FORBIDDEN);
         assertThat(exception.getHttpStatusCode()).isEqualTo(403);
     }
 
     @Test
-    @DisplayName("Should determine CONFLICT type for transaction not found")
-    void shouldDetermineConflictType_ForTransactionNotFound() {
+    @DisplayName("Should determine NOT_FOUND status for transaction not found")
+    void shouldDetermineNotFoundStatus_ForTransactionNotFound() {
 
         var exception = new DomainException(ErrorCode.TRANSACTION_NOT_FOUND, "Transaction not found");
 
-        assertThat(exception.getType()).isEqualTo(CONFLICT);
+        assertThat(exception.getHttpStatus()).isEqualTo(NOT_FOUND);
         assertThat(exception.getHttpStatusCode()).isEqualTo(404);
     }
 
     @Test
-    @DisplayName("Should determine AUTHENTICATION type for all auth errors")
-    void shouldDetermineAuthenticationType_ForAllAuthErrors() {
+    @DisplayName("Should determine UNAUTHORIZED status for all auth errors")
+    void shouldDetermineUnauthorizedStatus_ForAllAuthErrors() {
 
         var invalidToken = new DomainException(ErrorCode.INVALID_TOKEN, "Invalid token");
         var tokenExpired = new DomainException(ErrorCode.TOKEN_EXPIRED, "Token expired");
         var invalidCredentials = new DomainException(ErrorCode.INVALID_CREDENTIALS, "Invalid credentials");
         var adminAuthRequired = new DomainException(ErrorCode.ADMIN_AUTH_REQUIRED, "Admin auth required");
-        var adminAuthInsufficient = new DomainException(ErrorCode.ADMIN_AUTH_INSUFFICIENT, "Admin auth insufficient");
 
-        assertThat(invalidToken.getType()).isEqualTo(AUTHENTICATION);
-        assertThat(tokenExpired.getType()).isEqualTo(AUTHENTICATION);
-        assertThat(invalidCredentials.getType()).isEqualTo(AUTHENTICATION);
-        assertThat(adminAuthRequired.getType()).isEqualTo(AUTHENTICATION);
-        assertThat(adminAuthInsufficient.getType()).isEqualTo(AUTHENTICATION);
+        assertThat(invalidToken.getHttpStatus()).isEqualTo(UNAUTHORIZED);
+        assertThat(tokenExpired.getHttpStatus()).isEqualTo(UNAUTHORIZED);
+        assertThat(invalidCredentials.getHttpStatus()).isEqualTo(UNAUTHORIZED);
+        assertThat(adminAuthRequired.getHttpStatus()).isEqualTo(UNAUTHORIZED);
     }
 
     @Test

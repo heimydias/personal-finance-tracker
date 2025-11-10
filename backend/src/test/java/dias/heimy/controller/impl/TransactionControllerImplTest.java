@@ -2,7 +2,6 @@ package dias.heimy.controller.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -11,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import dias.heimy.domain.enums.TransactionType;
 import dias.heimy.dto.request.TransactionRequest;
-import dias.heimy.dto.response.MonthlyBalanceResponse;
 import dias.heimy.dto.response.TransactionResponse;
 import dias.heimy.service.TransactionService;
 import java.math.BigDecimal;
@@ -86,7 +84,7 @@ class TransactionControllerImplTest {
         when(transactionService.listTransactions(any(Pageable.class), anyString()))
                 .thenReturn(transactionsPage);
 
-        var result = transactionController.listTransactions(pageable, "Bearer token");
+        var result = transactionController.listTransactions(0, 10, "date", "Bearer token");
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isNotNull();
@@ -94,7 +92,7 @@ class TransactionControllerImplTest {
         assertThat(result.getBody().pageNumber()).isZero();
         assertThat(result.getBody().pageSize()).isEqualTo(10);
         assertThat(result.getBody().elements()).isEqualTo(1);
-        verify(transactionService).listTransactions(pageable, "Bearer token");
+        verify(transactionService).listTransactions(any(Pageable.class), eq("Bearer token"));
     }
 
     @Test
@@ -132,27 +130,6 @@ class TransactionControllerImplTest {
     }
 
     @Test
-    @DisplayName("Should get monthly balance successfully")
-    void shouldGetMonthlyBalance_WhenValidYearAndMonth() {
-
-        var year = 2025;
-        var month = 10;
-        var expectedResponse =
-                MonthlyBalanceResponse.of(year, month, new BigDecimal("5000.00"), new BigDecimal("2000.00"));
-
-        when(transactionService.getMonthlyBalance(year, month, "Bearer token")).thenReturn(expectedResponse);
-
-        var result = transactionController.getMonthlyBalance(year, month, "Bearer token");
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isEqualTo(expectedResponse);
-        assertThat(result.getBody().year()).isEqualTo(year);
-        assertThat(result.getBody().month()).isEqualTo(month);
-        assertThat(result.getBody().balance()).isEqualTo(new BigDecimal("3000.00"));
-        verify(transactionService).getMonthlyBalance(year, month, "Bearer token");
-    }
-
-    @Test
     @DisplayName("Should handle empty transactions list")
     void shouldHandleEmptyTransactionsList() {
 
@@ -162,13 +139,13 @@ class TransactionControllerImplTest {
         when(transactionService.listTransactions(any(Pageable.class), anyString()))
                 .thenReturn(emptyPage);
 
-        var result = transactionController.listTransactions(pageable, "Bearer token");
+        var result = transactionController.listTransactions(0, 10, "date", "Bearer token");
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isNotNull();
         assertThat(result.getBody().content()).isEmpty();
         assertThat(result.getBody().elements()).isZero();
-        verify(transactionService).listTransactions(pageable, "Bearer token");
+        verify(transactionService).listTransactions(any(Pageable.class), eq("Bearer token"));
     }
 
     @Test
@@ -205,40 +182,6 @@ class TransactionControllerImplTest {
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(result.getBody().type()).isEqualTo(TransactionType.EXPENSE);
-    }
-
-    @Test
-    @DisplayName("Should calculate monthly balance with zero expenses")
-    void shouldCalculateMonthlyBalance_WithZeroExpenses() {
-
-        var year = 2025;
-        var month = 10;
-        var expectedResponse = MonthlyBalanceResponse.of(year, month, new BigDecimal("5000.00"), BigDecimal.ZERO);
-
-        when(transactionService.getMonthlyBalance(anyInt(), anyInt(), anyString()))
-                .thenReturn(expectedResponse);
-
-        var result = transactionController.getMonthlyBalance(year, month, "Bearer token");
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody().balance()).isEqualTo(new BigDecimal("5000.00"));
-    }
-
-    @Test
-    @DisplayName("Should calculate monthly balance with zero income")
-    void shouldCalculateMonthlyBalance_WithZeroIncome() {
-
-        var year = 2025;
-        var month = 10;
-        var expectedResponse = MonthlyBalanceResponse.of(year, month, BigDecimal.ZERO, new BigDecimal("2000.00"));
-
-        when(transactionService.getMonthlyBalance(eq(year), eq(month), anyString()))
-                .thenReturn(expectedResponse);
-
-        var result = transactionController.getMonthlyBalance(year, month, "Bearer token");
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody().balance()).isEqualTo(new BigDecimal("-2000.00"));
     }
 
     private TransactionResponse createTransactionResponse(TransactionType type) {
