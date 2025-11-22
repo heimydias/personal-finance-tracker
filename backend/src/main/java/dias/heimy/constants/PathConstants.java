@@ -22,4 +22,6 @@ public class PathConstants {
     public static final String SAVINGS = API + "/savings";
 
     public static final String BALANCE = API + "/balance";
+
+    public static final String FORECAST = API + "/forecast";
 }
