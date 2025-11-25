@@ -13,6 +13,7 @@ import SavingsList from './components/SavingsList';
 import SavingsForm from './components/SavingsForm';
 import CurrentBalance from './components/CurrentBalance';
 import MonthlyBalance from './components/MonthlyBalance';
+import Forecast from './components/Forecast';
 import ProtectedRoute from './components/ProtectedRoute';
 import { authService } from './services/auth';
 import './App.css';
@@ -142,6 +143,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MonthlyBalance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forecast"
+          element={
+            <ProtectedRoute>
+              <Forecast />
             </ProtectedRoute>
           }
         />

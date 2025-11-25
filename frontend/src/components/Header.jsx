@@ -52,7 +52,7 @@ const Header = () => {
         </Button>
         {isAdmin && (
           <Button onClick={() => navigate('/users')} variant="ghost" size="small" icon="👥">
-            Usuários
+            Usuarios
           </Button>
         )}
         <Button onClick={handleLogout} variant="danger" size="small">

@@ -127,6 +127,28 @@ const Dashboard = () => {
               <span style={{ fontSize: '2rem' }}>📊</span>
               <span>Saldo Mensal</span>
             </button>
+
+            <button
+              onClick={() => navigate('/forecast')}
+              style={{
+                padding: '1.5rem',
+                backgroundColor: '#6366f1',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.5rem',
+                gridColumn: 'span 2',
+              }}
+            >
+              <span style={{ fontSize: '2rem' }}>🔮</span>
+              <span>Previsao Financeira</span>
+            </button>
           </div>
         </div>
       </div>
