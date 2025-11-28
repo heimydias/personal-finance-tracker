@@ -5,6 +5,7 @@ CREATE TABLE transactions (
     amount DECIMAL(15, 2) NOT NULL,
     transaction_date DATE NOT NULL,
     description VARCHAR(500),
+    transfer_type VARCHAR(20),
     user_id BINARY(16) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
