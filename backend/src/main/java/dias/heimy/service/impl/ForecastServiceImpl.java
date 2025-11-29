@@ -38,7 +38,7 @@ public class ForecastServiceImpl implements ForecastService {
     @Override
     @Transactional(readOnly = true)
     public ForecastResponse calculateForecast(int monthsToAnalyze, String authorizationHeader) {
-        int validMonths = Math.max(1, Math.min(12, monthsToAnalyze));
+        int validMonths = Math.clamp(monthsToAnalyze, 1, 12);
 
         String email = extractEmailFromToken(authorizationHeader);
         User user = findUserByEmail(email);

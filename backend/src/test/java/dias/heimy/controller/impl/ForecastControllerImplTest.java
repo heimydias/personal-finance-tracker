@@ -123,9 +123,12 @@ class ForecastControllerImplTest {
         LocalDate nextMonth = LocalDate.now().plusMonths(1);
 
         var history = List.of(
-                MonthlyHistoryResponse.of(2024, 10, new BigDecimal("3000.00"), new BigDecimal("1500.00"), new BigDecimal("500.00")),
-                MonthlyHistoryResponse.of(2024, 9, new BigDecimal("3200.00"), new BigDecimal("1400.00"), new BigDecimal("600.00")),
-                MonthlyHistoryResponse.of(2024, 8, new BigDecimal("2800.00"), new BigDecimal("1600.00"), new BigDecimal("400.00")));
+                MonthlyHistoryResponse.of(
+                        2024, 10, new BigDecimal("3000.00"), new BigDecimal("1500.00"), new BigDecimal("500.00")),
+                MonthlyHistoryResponse.of(
+                        2024, 9, new BigDecimal("3200.00"), new BigDecimal("1400.00"), new BigDecimal("600.00")),
+                MonthlyHistoryResponse.of(
+                        2024, 8, new BigDecimal("2800.00"), new BigDecimal("1600.00"), new BigDecimal("400.00")));
 
         return new ForecastResponse(
                 nextMonth.getYear(),

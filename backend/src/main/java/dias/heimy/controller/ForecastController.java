@@ -20,9 +20,8 @@ public interface ForecastController {
 
     @Operation(
             summary = "Calcular previsão financeira para o próximo mês",
-            description =
-                    "Calcula a previsão de receitas, despesas e saldo para o próximo mês "
-                            + "baseado na média dos meses anteriores. Inclui rendimento projetado das poupanças.",
+            description = "Calcula a previsão de receitas, despesas e saldo para o próximo mês "
+                    + "baseado na média dos meses anteriores. Inclui rendimento projetado das poupanças.",
             security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping
     ResponseEntity<ForecastResponse> getForecast(

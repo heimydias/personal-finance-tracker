@@ -126,7 +126,7 @@ class ForecastServiceImplTest {
         var result = forecastService.calculateForecast(3, "Bearer token");
 
         assertThat(result).isNotNull();
-        assertThat(result.monthsAnalyzed()).isEqualTo(0);
+        assertThat(result.monthsAnalyzed()).isZero();
         assertThat(result.averageIncome()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.averageExpense()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.projectedIncome()).isEqualByComparingTo(BigDecimal.ZERO);
@@ -190,6 +190,37 @@ class ForecastServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(result.averageIncome()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(result.averageExpense()).isGreaterThan(BigDecimal.ZERO);
+    }
+
+    @Test
+    @DisplayName("Should calculate forecast with only savings deposit")
+    void shouldCalculateForecast_WithOnlySavingsDeposit() {
+        var user = createTestUser();
+        var userBalance = createTestUserBalance(user);
+
+        when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userBalanceRepository.findByUserId(user.getId())).thenReturn(Optional.of(userBalance));
+        when(savingsRepository.findByUserId(eq(user.getId()), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        when(transactionRepository.sumByUserAndTypeAndDateBetween(
+                        eq(user), eq(TransactionType.INCOME), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumByUserAndTypeAndDateBetween(
+                        eq(user), eq(TransactionType.EXPENSE), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumSavingsDepositsByUserAndDateBetween(
+                        eq(user), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(new BigDecimal("1000.00"));
+
+        var result = forecastService.calculateForecast(3, "Bearer token");
+
+        assertThat(result).isNotNull();
+        assertThat(result.averageIncome()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.averageExpense()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.averageSavingsDeposit()).isGreaterThan(BigDecimal.ZERO);
+        assertThat(result.history()).isNotEmpty();
     }
 
     @Test
@@ -361,6 +392,48 @@ class ForecastServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should handle savings with null amount")
+    void shouldHandleSavings_WithNullAmount() {
+        var user = createTestUser();
+        var userBalance = createTestUserBalance(user);
+        var savings = createTestSavings(user, "Poupança Null Amount", null, new BigDecimal("1.00"));
+
+        when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userBalanceRepository.findByUserId(user.getId())).thenReturn(Optional.of(userBalance));
+        when(savingsRepository.findByUserId(eq(user.getId()), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(savings)));
+
+        mockTransactionSums(user, new BigDecimal("3000.00"), new BigDecimal("1500.00"), BigDecimal.ZERO);
+
+        var result = forecastService.calculateForecast(3, "Bearer token");
+
+        assertThat(result).isNotNull();
+        assertThat(result.projectedSavingsYield()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    @DisplayName("Should handle savings with null interest rate")
+    void shouldHandleSavings_WithNullInterestRate() {
+        var user = createTestUser();
+        var userBalance = createTestUserBalance(user);
+        var savings = createTestSavings(user, "Poupança Null Rate", new BigDecimal("10000.00"), null);
+
+        when(jwtTokenProvider.extractEmailFromToken("token")).thenReturn("test@example.com");
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userBalanceRepository.findByUserId(user.getId())).thenReturn(Optional.of(userBalance));
+        when(savingsRepository.findByUserId(eq(user.getId()), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(savings)));
+
+        mockTransactionSums(user, new BigDecimal("3000.00"), new BigDecimal("1500.00"), BigDecimal.ZERO);
+
+        var result = forecastService.calculateForecast(3, "Bearer token");
+
+        assertThat(result).isNotNull();
+        assertThat(result.projectedSavingsYield()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
     @DisplayName("Should calculate projected balances correctly")
     void shouldCalculateProjectedBalances_Correctly() {
         var user = createTestUser();
@@ -384,12 +457,10 @@ class ForecastServiceImplTest {
                 result.currentAccountBalance().add(result.projectedIncome()).subtract(result.projectedExpense());
         assertThat(result.projectedAccountBalance()).isEqualByComparingTo(expectedProjectedAccount);
 
-        BigDecimal expectedProjectedSavings =
-                result.currentSavingsBalance().add(result.projectedSavingsYield());
+        BigDecimal expectedProjectedSavings = result.currentSavingsBalance().add(result.projectedSavingsYield());
         assertThat(result.projectedSavingsBalance()).isEqualByComparingTo(expectedProjectedSavings);
 
-        BigDecimal expectedProjectedTotal =
-                result.projectedAccountBalance().add(result.projectedSavingsBalance());
+        BigDecimal expectedProjectedTotal = result.projectedAccountBalance().add(result.projectedSavingsBalance());
         assertThat(result.projectedTotalBalance()).isEqualByComparingTo(expectedProjectedTotal);
     }
 

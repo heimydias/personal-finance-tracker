@@ -33,7 +33,6 @@ public record ForecastResponse(
                 BigDecimal currentAccountBalance,
         @Schema(description = "Saldo atual em poupança") @JsonProperty("currentSavingsBalance")
                 BigDecimal currentSavingsBalance,
-        @Schema(description = "Saldo total atual") @JsonProperty("currentTotalBalance")
-                BigDecimal currentTotalBalance,
+        @Schema(description = "Saldo total atual") @JsonProperty("currentTotalBalance") BigDecimal currentTotalBalance,
         @Schema(description = "Histórico dos meses analisados") @JsonProperty("history")
                 List<MonthlyHistoryResponse> history) {}
