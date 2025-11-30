@@ -24,6 +24,7 @@ Sistema de gerenciamento financeiro pessoal com autenticação JWT, controle de 
 - [Requisitos](#requisitos)
 - [Configuração](#configuração)
 - [Execução](#execução)
+- [Diagramas](#diagramas)
 - [Contato](#contato)
 
 ## Arquitetura
@@ -33,7 +34,7 @@ Sistema de gerenciamento financeiro pessoal com autenticação JWT, controle de 
 A aplicação segue uma arquitetura de microserviços com três componentes principais:
 - **Frontend (React):** Interface de usuário desenvolvida em React
 - **Backend (Spring Boot):** API REST com autenticação JWT
-- **Database (PostgreSQL):** Banco de dados relacional para persistência
+- **Database (MySQL):** Banco de dados relacional para persistência
 
 ## Funcionalidades
 
@@ -41,6 +42,22 @@ A aplicação segue uma arquitetura de microserviços com três componentes prin
 - Autenticação JWT com Spring Security
 - Perfis de usuário (Admin/User)
 - Controle de acesso baseado em roles
+
+### Gestão de Transações
+- Registro de receitas e despesas
+- Transferências para poupança
+- Categorização de transações
+- Histórico completo de movimentações
+
+### Gestão de Poupanças
+- Criação de metas de poupança
+- Diferentes tipos (emergência, aposentadoria, viagem, etc.)
+- Cálculo automático de rendimentos
+
+### Consultas e Relatórios
+- Saldo atual da conta
+- Saldo mensal detalhado
+- Previsão financeira baseada em histórico
 
 ## Tecnologias
 
@@ -87,23 +104,22 @@ A aplicação segue uma arquitetura de microserviços com três componentes prin
 - Confirmação de senha
 - Integração com backend para criação de conta
 
-#### Dashboard (Em desenvolvimento)
+#### Dashboard
 - Visão geral das finanças pessoais
 - Resumo de receitas e despesas
 - Gráficos e indicadores financeiros
 
 ### Tecnologias do Frontend
-- React 18
-- TypeScript
-- Material-UI (MUI)
-- React Router
+- React 19
+- Vite 7
+- React Router 7
 - Axios para requisições HTTP
 - Context API para gerenciamento de estado
 
 ## Swagger
 
-- **OpenAPI UI:** [http://localhost:8080/ecommerce-management/swagger-ui/index.html](http://localhost:8080/ecommerce-management/swagger-ui/index.html)
-- **API Docs:** [http://localhost:8080/ecommerce-management/v3/api-docs](http://localhost:8080/ecommerce-management/v3/api-docs)
+- **OpenAPI UI:** [http://localhost:8080/personal-finance-tracker/swagger-ui/index.html](http://localhost:8080/personal-finance-tracker/swagger-ui/index.html)
+- **API Docs:** [http://localhost:8080/personal-finance-tracker/v3/api-docs](http://localhost:8080/personal-finance-tracker/v3/api-docs)
 
 ## Requisitos
 
@@ -145,6 +161,16 @@ Após a inicialização da aplicação, um usuário administrador padrão é cri
 
 1. **Fazer login:** Use o endpoint `/auth/login` com as credenciais padrão para obter o token JWT
 2. **Usar token:** Adicione o token no header `Authorization: Bearer {token}` em todas as requisições protegidas
+
+## Diagramas
+
+### Diagrama de Classes
+
+![Diagrama de Classes](docs/diagrama-classes.png)
+
+### Diagrama de Casos de Uso
+
+![Diagrama de Casos de Uso](docs/diagrama-casos-uso.png)
 
 ## Contato
 

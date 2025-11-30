@@ -1,0 +1,105 @@
+@startuml
+
+left to right direction
+skinparam actorBackgroundColor #FFEAA7
+skinparam actorBorderColor #999999
+skinparam usecaseBackgroundColor #AED6F1
+skinparam usecaseBorderColor #5DADE2
+skinparam packageBackgroundColor #FFFFFF
+skinparam packageBorderColor #999999
+
+' ========================================
+' ATORES
+' ========================================
+:Usuário: as User
+:Administrador: as Admin
+
+rectangle "Personal Finance Tracker" {
+
+    ' ========================================
+    ' AUTENTICAÇÃO
+    ' ========================================
+    (Login) as UC1
+    (Refresh Token) as UC2
+
+    ' ========================================
+    ' TRANSAÇÕES
+    ' ========================================
+    (Criar Transação) as UC3
+    (Listar Transações) as UC4
+    (Visualizar Transação) as UC5
+    (Editar Transação) as UC6
+    (Excluir Transação) as UC7
+
+    ' ========================================
+    ' POUPANÇAS
+    ' ========================================
+    (Criar Poupança) as UC8
+    (Listar Poupanças) as UC9
+    (Visualizar Poupança) as UC10
+    (Editar Poupança) as UC11
+    (Excluir Poupança) as UC12
+    (Calcular Rendimento) as UC13
+
+    ' ========================================
+    ' SALDO
+    ' ========================================
+    (Consultar Saldo Atual) as UC14
+    (Consultar Saldo Mensal) as UC15
+
+    ' ========================================
+    ' PREVISÃO
+    ' ========================================
+    (Gerar Previsão Financeira) as UC16
+
+    ' ========================================
+    ' ADMINISTRAÇÃO
+    ' ========================================
+    (Criar Usuário) as UC17
+    (Listar Usuários) as UC18
+    (Visualizar Usuário) as UC19
+    (Editar Usuário) as UC20
+    (Excluir Usuário) as UC21
+
+}
+
+' ========================================
+' RELACIONAMENTOS - USUÁRIO
+' ========================================
+User -- UC1
+User -- UC2
+
+User -- UC3
+User -- UC4
+User -- UC6
+User -- UC7
+
+User -- UC8
+User -- UC9
+User -- UC11
+User -- UC12
+
+User -- UC14
+User -- UC15
+
+User -- UC16
+
+' ========================================
+' RELACIONAMENTOS - ADMINISTRADOR
+' ========================================
+Admin --|> User
+
+Admin -- UC17
+Admin -- UC18
+Admin -- UC20
+Admin -- UC21
+
+' ========================================
+' EXTENDS
+' ========================================
+UC5 .left.> UC4 : <<extend>>
+UC10 .left.> UC9 : <<extend>>
+UC13 .left.> UC10 : <<extend>>
+UC19 .left.> UC18 : <<extend>>
+
+@enduml

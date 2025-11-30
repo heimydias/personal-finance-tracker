@@ -1,0 +1,170 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classBackgroundColor #FFFFCC
+skinparam classBorderColor #999999
+skinparam arrowColor #666666
+
+' ========================================
+' ENTITIES
+' ========================================
+class User {
+    - id : UUID
+    - name : String
+    - email : String
+    - password : String
+    - role : UserRole
+    - isSystemAdmin : Boolean
+    - createdAt : LocalDateTime
+    - updatedAt : LocalDateTime
+    - createdBy : String
+    - lastModifiedBy : String
+    --
+    + getId() : UUID
+    + getName() : String
+    + getEmail() : String
+    + getPassword() : String
+    + getRole() : UserRole
+    + getIsSystemAdmin() : Boolean
+    + getCreatedAt() : LocalDateTime
+    + getUpdatedAt() : LocalDateTime
+    + getCreatedBy() : String
+    + getLastModifiedBy() : String
+}
+
+class Transaction {
+    - id : UUID
+    - type : TransactionType
+    - category : String
+    - amount : BigDecimal
+    - transactionDate : LocalDate
+    - description : String
+    - transferType : TransferType
+    - user : User
+    - createdAt : LocalDateTime
+    - updatedAt : LocalDateTime
+    - createdBy : String
+    - lastModifiedBy : String
+    --
+    + getId() : UUID
+    + getType() : TransactionType
+    + getCategory() : String
+    + getAmount() : BigDecimal
+    + getTransactionDate() : LocalDate
+    + getDescription() : String
+    + getTransferType() : TransferType
+    + getUser() : User
+    + getCreatedAt() : LocalDateTime
+    + getUpdatedAt() : LocalDateTime
+}
+
+class Savings {
+    - id : UUID
+    - name : String
+    - type : SavingsType
+    - amount : BigDecimal
+    - interestRate : BigDecimal
+    - description : String
+    - transactionDate : LocalDate
+    - user : User
+    - depositTransaction : Transaction
+    - createdAt : LocalDateTime
+    - updatedAt : LocalDateTime
+    - createdBy : String
+    - lastModifiedBy : String
+    --
+    + getId() : UUID
+    + getName() : String
+    + getType() : SavingsType
+    + getAmount() : BigDecimal
+    + getInterestRate() : BigDecimal
+    + getDescription() : String
+    + getTransactionDate() : LocalDate
+    + getUser() : User
+    + getDepositTransaction() : Transaction
+    + getCreatedAt() : LocalDateTime
+    + getUpdatedAt() : LocalDateTime
+}
+
+class UserBalance {
+    - id : UUID
+    - user : User
+    - totalIncome : BigDecimal
+    - totalExpense : BigDecimal
+    - accountBalance : BigDecimal
+    - savingsBalance : BigDecimal
+    - totalBalance : BigDecimal
+    - createdAt : LocalDateTime
+    - updatedAt : LocalDateTime
+    - version : Long
+    --
+    + getId() : UUID
+    + getUser() : User
+    + getTotalIncome() : BigDecimal
+    + getTotalExpense() : BigDecimal
+    + getAccountBalance() : BigDecimal
+    + getSavingsBalance() : BigDecimal
+    + getTotalBalance() : BigDecimal
+    + getVersion() : Long
+    + updateBalance(BigDecimal, BigDecimal, BigDecimal, BigDecimal) : void
+}
+
+' ========================================
+' ENUMS
+' ========================================
+enum UserRole {
+    ADMIN
+    USER
+    --
+    - authority : String
+    --
+    + getAuthority() : String
+    + getRoleName() : String
+}
+
+enum TransactionType {
+    INCOME
+    EXPENSE
+    TRANSFER
+}
+
+enum SavingsType {
+    EMERGENCY_FUND
+    RETIREMENT
+    TRAVEL
+    INVESTMENT
+    EDUCATION
+    HOME
+    VEHICLE
+    OTHER
+    --
+    - description : String
+    --
+    + getDescription() : String
+}
+
+enum TransferType {
+    DEPOSIT
+    WITHDRAWAL
+    --
+    - description : String
+    --
+    + getDescription() : String
+}
+
+' ========================================
+' RELATIONSHIPS
+' ========================================
+User "1" --o "0..*" Transaction
+User "1" --o "0..*" Savings
+User "1" --o "1" UserBalance
+
+Savings "0..*" --> "0..1" Transaction
+
+User --> UserRole
+Transaction --> TransactionType
+Transaction --> TransferType
+Savings --> SavingsType
+
+@enduml
